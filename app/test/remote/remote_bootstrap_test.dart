@@ -141,6 +141,37 @@ DSHAPP url dsh web: http://127.0.0.1:51234/?token=launch-tok
       expect(loginShell('echo hi'), "sh -lc 'echo hi'");
     });
 
+    // A host's profile with bash syntax kills dash's login shell before any script runs
+    // (`sh: 19: …/common.sh: Syntax error: "(" unexpected`); seen on a real host.
+    final dashAndBash =
+        File('/bin/sh').resolveSymbolicLinksSync().endsWith('dash') &&
+        Process.runSync('sh', ['-c', 'command -v bash']).exitCode == 0;
+    test('a login profile sh cannot parse: the script runs again through bash, once', () async {
+      final home = Directory.systemTemp.createTempSync('dsh-app-profile-');
+      addTearDown(() => home.deleteSync(recursive: true));
+      final shell = LocalProcessShell(environment: {...Platform.environment, 'HOME': home.path});
+      final commands = <String>[];
+      Future<RemoteExecResult> exec(String command) {
+        commands.add(command);
+        return shell.run(command);
+      }
+
+      File('${home.path}/.profile').writeAsStringSync('X=from-profile\nbanner=(a b c)\n');
+      final r = await runScript('echo "x=\$X"; echo done', exec);
+      expect(commands, hasLength(2));
+      expect(r.stdout, isNot(contains(shellStarted)));
+      // bash read the same profile: its PATH and variables come along.
+      expect(r.stdout, 'x=from-profile\ndone\n');
+
+      // A profile sh reads fine: one try, as before, with the profile applied.
+      File('${home.path}/.profile').writeAsStringSync('X=from-profile\n');
+      commands.clear();
+      final ok = await runScript('echo "x=\$X"', exec);
+      expect(commands, [startsWith('sh -lc ')]);
+      expect(ok.stdout, 'x=from-profile\n');
+      expect(ok.exitCode, 0);
+    }, skip: dashAndBash ? false : 'needs dash as /bin/sh and bash');
+
     test('start script always binds loopback with an OS-picked port', () {
       final script = RemoteDshBootstrap(LocalProcessShell()).startScript();
       expect(script, contains('dsh web --host 127.0.0.1 --port 0 --no-open'));

@@ -252,9 +252,16 @@ class DartSshTransport implements SshTransport {
 
   @override
   Future<RemoteExecResult> run(String script, {Duration timeout = const Duration(seconds: 30)}) async {
-    final SSHRunResult result;
     try {
-      result = await _client.runWithResult(loginShell(script)).timeout(timeout);
+      // Each try gets the whole timeout; a host whose `sh -l` dies before the script takes two.
+      return await runScript(script, (command) async {
+        final run = await _client.runWithResult(command).timeout(timeout);
+        return RemoteExecResult(
+          run.exitCode,
+          utf8.decode(run.stdout, allowMalformed: true),
+          utf8.decode(run.stderr, allowMalformed: true),
+        );
+      });
     } on TimeoutException {
       throw HostLinkError(
         HostLinkErrorKind.unreachable,
@@ -270,11 +277,6 @@ class DartSshTransport implements SshTransport {
         retryable: true,
       );
     }
-    return RemoteExecResult(
-      result.exitCode,
-      utf8.decode(result.stdout, allowMalformed: true),
-      utf8.decode(result.stderr, allowMalformed: true),
-    );
   }
 
   @override

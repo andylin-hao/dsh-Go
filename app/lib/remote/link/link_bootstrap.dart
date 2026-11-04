@@ -134,24 +134,30 @@ class LinkBootstrap {
     b.write(r'''
 D="$HOME/.dsh-go/link"
 mkdir -p "$D/bin" && chmod 700 "$HOME/.dsh-go" "$D" "$D/bin" 2>/dev/null
-N=$(command -v node 2>/dev/null)
+N=""
+OLD=""
+for c in "$(command -v node 2>/dev/null)" /opt/homebrew/bin/node /usr/local/bin/node "$HOME/.volta/bin/node" \
+  "$HOME/.nix-profile/bin/node" /nix/var/nix/profiles/default/bin/node /run/current-system/sw/bin/node \
+  $(ls -d "$HOME"/.nvm/versions/node/*/bin/node 2>/dev/null | tail -n 1); do
+  if [ -z "$c" ] || [ ! -x "$c" ]; then continue; fi
+  V=$("$c" -p 'process.versions.node' 2>/dev/null)
+  case "$V" in
+    ''|[0-9].*|1[0-7].*) if [ -z "$OLD" ]; then OLD=$V; fi;;
+    *) N=$c; break;;
+  esac
+done
 if [ -z "$N" ]; then
-  for c in /opt/homebrew/bin/node /usr/local/bin/node "$HOME/.volta/bin/node" $(ls -d "$HOME"/.nvm/versions/node/*/bin/node 2>/dev/null | tail -n 1); do
-    if [ -x "$c" ]; then N=$c; break; fi
-  done
+  if [ -n "$OLD" ]; then printf 'DSHGOLINK-ERR node_old %s\n' "$OLD"; else printf 'DSHGOLINK-ERR node_missing\n'; fi
+  exit 0
 fi
-if [ -z "$N" ]; then printf 'DSHGOLINK-ERR node_missing\n'; exit 0; fi
-V=$("$N" -p 'process.versions.node' 2>/dev/null)
-case "$V" in
-  ''|[0-9].*|1[0-7].*) printf 'DSHGOLINK-ERR node_old %s\n' "$V"; exit 0;;
-esac
 ''');
     return b.toString();
   }
 
-  /// Finds Node (login PATH, then the usual install places), checks the installed copy's hash,
-  /// installs ours when it differs and [upload] (the uploaded base64, see [_upload]) is there,
-  /// then `start --json`.
+  /// Finds Node 18 or later (login PATH, then the usual install places, Nix profiles included; an
+  /// older one on PATH, like a distribution's Node 12, doesn't end the search), checks the
+  /// installed copy's hash, installs ours when it differs and [upload] (the uploaded base64, see
+  /// [_upload]) is there, then `start --json`.
   String startScript({required bool upload}) {
     final b = StringBuffer(_prelude())
       ..write(r'''

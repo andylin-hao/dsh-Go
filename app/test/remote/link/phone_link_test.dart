@@ -213,6 +213,19 @@ void main() {
       expect(setup[1].file, '~/.codex/config.toml');
     }, skip: _hasNode ? false : 'node is not on PATH');
 
+    test('an old Node on PATH is passed over for a newer one in a Nix profile', () async {
+      // As on a host whose distribution ships Node 12 in /usr/bin and Node 24 in ~/.nix-profile.
+      final real = File(Process.runSync('sh', ['-c', 'command -v node']).stdout.toString().trim()).resolveSymbolicLinksSync();
+      final old = Directory('${home.path}/old-bin')..createSync();
+      File('${old.path}/node').writeAsStringSync('#!/bin/sh\necho 12.22.9\n');
+      Process.runSync('chmod', ['755', '${old.path}/node']);
+      Link('${home.path}/.nix-profile/bin/node').createSync(real, recursive: true);
+      final b = LinkBootstrap(LocalTransport(home.path), script: _script, environment: {'PATH': '${old.path}:/usr/bin:/bin'});
+      expect((await b.ensure()).port, greaterThan(0));
+      // The daemon and the agents' entries use the Nix profile's Node.
+      expect((await b.agentSetup()).first.text, contains(real));
+    }, skip: _hasNode ? false : 'node is not on PATH');
+
     test('a changed copy is uploaded again', () async {
       final shell = LocalTransport(home.path);
       await LinkBootstrap(shell, script: _script).ensure();
