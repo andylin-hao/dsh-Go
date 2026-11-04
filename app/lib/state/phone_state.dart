@@ -386,8 +386,9 @@ final phoneConfirmPendingProvider = Provider<void>((ref) {
 
 /// 停止 on the overlay or the notification ends the agent's turn too. The
 /// native side can't reach the session, so the app cancels every turn running
-/// on the local engine (phone control only drives the local engine). Kept
-/// alive by the home shell.
+/// on the local engine when that engine owned the task. An agent on a computer
+/// (dsh-go-link) is told to stop by its next call's result instead. Kept alive
+/// by the home shell.
 final phoneStopWatcherProvider = Provider<void>((ref) {
   final channel = ref.watch(phoneChannelProvider);
   StreamSubscription<PhoneStatus>? sub;
@@ -402,7 +403,8 @@ final phoneStopWatcherProvider = Provider<void>((ref) {
     if (disposed || !status.ready) return;
     var stopped = status.task.stopped;
     sub = channel.statusChanges.listen((s) {
-      if (s.task.stopped && !stopped) unawaited(_cancelLocalTurns(ref));
+      // A computer's agent owned the task: its turn isn't on this engine (the agent is refused instead).
+      if (s.task.stopped && !stopped && s.task.origin == null) unawaited(_cancelLocalTurns(ref));
       stopped = s.task.stopped;
     }, onError: (_) {});
   }());

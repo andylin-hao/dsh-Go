@@ -10491,6 +10491,187 @@ class L10nEn extends L10n {
   String get phoneKeepFailed => 'Couldn’t reconnect. Tries again when you open the app or start a task.';
 
   @override
+  String get phoneLinkTitle => 'Computers';
+
+  @override
+  String get phoneLinkHint =>
+      'Let agents on your SSH hosts, like Claude Code, Codex, OpenCode or Antigravity, use this phone.';
+
+  @override
+  String get phoneLinkNoHosts => 'No SSH hosts yet';
+
+  @override
+  String get phoneLinkNoHostsHint => 'Add one in the host switcher, then turn it on here.';
+
+  @override
+  String get phoneLinkOff => 'Off';
+
+  @override
+  String get phoneLinkConnecting => 'Connecting…';
+
+  @override
+  String get phoneLinkAttached => 'Connected · No agent yet';
+
+  @override
+  String phoneLinkAttachedAgents(String agents) {
+    return 'Connected · $agents';
+  }
+
+  @override
+  String phoneLinkWaiting(String reason) {
+    return 'Reconnecting · $reason';
+  }
+
+  @override
+  String get phoneLinkErrHostKeyUnknown => 'Connect to this host once in DSH Go to confirm its key';
+
+  @override
+  String get phoneLinkErrHostKeyChanged => 'The host’s key changed. Check it on the host’s page';
+
+  @override
+  String get phoneLinkErrNoShell => 'The host has no POSIX shell';
+
+  @override
+  String get phoneLinkErrNodeMissing => 'Node.js isn’t installed on the computer';
+
+  @override
+  String phoneLinkErrNodeOld(String version) {
+    return 'Node.js $version is too old. Version 18 or later is needed';
+  }
+
+  @override
+  String get phoneLinkErrInstall => 'Couldn’t install dsh-go-link on the computer';
+
+  @override
+  String get phoneLinkErrStart => 'dsh-go-link didn’t start on the computer';
+
+  @override
+  String get phoneLinkErrRefused => 'dsh-go-link refused the connection';
+
+  @override
+  String get phoneLinkErrReplaced => 'Another phone is connected to this computer';
+
+  @override
+  String get phoneLinkErrLost => 'Connection lost';
+
+  @override
+  String get phoneLinkErrSsh => 'Couldn’t reach the host';
+
+  @override
+  String phoneLinkWorking(String agent) {
+    return '$agent is operating the phone';
+  }
+
+  @override
+  String get phoneLinkSetup => 'Set up agents';
+
+  @override
+  String phoneLinkSetupTitle(String host) {
+    return 'Phone tools on “$host”';
+  }
+
+  @override
+  String get phoneLinkSetupBody =>
+      'Register the phone tools with each agent once. They show up as “phone”, and work while this switch is on.';
+
+  @override
+  String get phoneLinkSetupRun => 'Run in a terminal';
+
+  @override
+  String phoneLinkSetupAddTo(String file) {
+    return 'Add to $file';
+  }
+
+  @override
+  String get phoneLinkSetupLoading => 'Reading paths from the computer…';
+
+  @override
+  String phoneLinkSetupFailed(String reason) {
+    return 'Couldn’t read the setup: $reason';
+  }
+
+  @override
+  String get phoneLinkSetupNote =>
+      'Confirmation, app rules and lifted limits apply as they do for DSH. Agents are named as they report themselves, so check the computer before you approve.';
+
+  @override
+  String phoneLinkRiskTitle(String host) {
+    return 'Let agents on “$host” use this phone?';
+  }
+
+  @override
+  String get phoneLinkRiskBody =>
+      'They can read the screen, tap and type, with the same confirmation and limits as DSH. Screen text goes to that computer and to the model its agent uses.';
+
+  @override
+  String get phoneLinkRiskAction => 'Allow';
+
+  @override
+  String get phoneLinkErrUnreachable => 'Couldn’t reach the computer on this network';
+
+  @override
+  String get phoneLinkErrNotPaired => 'The computer no longer accepts this phone. Pair it again';
+
+  @override
+  String get phoneLinkPair => 'Pair a computer on this network';
+
+  @override
+  String get phoneLinkPairHint => 'For a Mac or PC without SSH. It needs Node.js 18 or later';
+
+  @override
+  String get phoneLinkPairTitle => 'Pair a computer';
+
+  @override
+  String get phoneLinkPairStep1 => 'On the computer, download dsh-go-link:';
+
+  @override
+  String get phoneLinkPairStep2 => 'Then start pairing. It shows a QR code:';
+
+  @override
+  String get phoneLinkPairStep3 => 'Scan the QR code with this phone’s camera, or paste the link it prints:';
+
+  @override
+  String get phoneLinkPairPaste => 'Paste the link';
+
+  @override
+  String get phoneLinkPairInvalid => 'That isn’t a dsh-go-link pairing link';
+
+  @override
+  String phoneLinkPairConfirmTitle(String name) {
+    return 'Pair with “$name”?';
+  }
+
+  @override
+  String phoneLinkPairConfirmBody(String fingerprint) {
+    return 'Its agents will be able to use this phone, with the same confirmation and limits as DSH. Screen text goes to that computer and to the model its agent uses. Its key: $fingerprint';
+  }
+
+  @override
+  String get phoneLinkPairAction => 'Pair';
+
+  @override
+  String phoneLinkPaired(String name) {
+    return 'Paired with $name';
+  }
+
+  @override
+  String get phoneLinkPairNeedsPhoneControl => 'Turn on phone control first, then open the link again';
+
+  @override
+  String get phoneLinkForget => 'Forget this computer';
+
+  @override
+  String phoneLinkKey(String fingerprint) {
+    return 'Key $fingerprint';
+  }
+
+  @override
+  String get phoneLinkAgents => 'Agent sessions';
+
+  @override
+  String get phoneLinkAgentsHint => 'Start Claude Code, Codex or OpenCode there and follow them from here';
+
+  @override
   String get phoneModeTitle => 'How DSH confirms';
 
   @override
@@ -12786,6 +12967,10 @@ class L10nEn extends L10n {
       'dsh isn’t installed on the host. Install it and retry, or enter its full path as the start command.';
 
   @override
+  String get remoteErrDshMissingPhoneLink =>
+      'Only want this computer’s agents to use the phone? DSH isn’t needed: save the host, then turn it on in Settings › Phone control › Computers';
+
+  @override
   String get remoteStartCommandExample => 'Example start command: ~/.nvm/versions/node/v22.0.0/bin/dsh web';
 
   @override
@@ -14184,6 +14369,252 @@ class L10nEn extends L10n {
   String get remoteNetworkObservedAt => 'Last checked';
 
   @override
+  String get agentsTitle => 'Agents on computers';
+
+  @override
+  String get agentsSubtitle => 'Claude Code, Codex, Antigravity and OpenCode, running on your computers';
+
+  @override
+  String get agentsEmpty => 'No computer that runs agents is connected';
+
+  @override
+  String get agentsEmptyHint =>
+      'Turn one on in Settings › Phone control › Computers. It runs the agents installed there';
+
+  @override
+  String get agentsNew => 'New session';
+
+  @override
+  String get agentsNoSessions => 'No sessions yet';
+
+  @override
+  String get agentsNoneInstalled =>
+      'No supported agent is installed on this computer: Claude Code, Codex, Antigravity, OpenCode or Gemini CLI';
+
+  @override
+  String get agentsStatusRunning => 'Working';
+
+  @override
+  String get agentsStatusIdle => 'Ready';
+
+  @override
+  String get agentsStatusStarting => 'Starting…';
+
+  @override
+  String get agentsStatusStopped => 'Paused · resumes when you write';
+
+  @override
+  String get agentsWaitingForYou => 'Waiting for you';
+
+  @override
+  String agentsNewTitle(String computer) {
+    return 'New session on “$computer”';
+  }
+
+  @override
+  String get agentsPickAgent => 'Agent';
+
+  @override
+  String get agentsPickFolder => 'Folder';
+
+  @override
+  String get agentsStartHere => 'Start here';
+
+  @override
+  String get agentsUp => 'Up one folder';
+
+  @override
+  String agentsComposerHint(String agent) {
+    return 'Message $agent';
+  }
+
+  @override
+  String get agentsEndSession => 'End session';
+
+  @override
+  String get agentsMode => 'Mode';
+
+  @override
+  String get agentsThinking => 'Thinking';
+
+  @override
+  String agentsPermissionTitle(String tool) {
+    return 'Allow “$tool”?';
+  }
+
+  @override
+  String agentsPermissionChosen(String option) {
+    return 'Answered: $option';
+  }
+
+  @override
+  String get agentsPermissionCancelled => 'No longer waiting';
+
+  @override
+  String get agentsPlan => 'Plan';
+
+  @override
+  String get agentsStopped => 'Stopped';
+
+  @override
+  String get agentsStoppedLength => 'Stopped: the reply reached its length limit';
+
+  @override
+  String get agentsStoppedRefusal => 'The agent declined to go on';
+
+  @override
+  String agentsStoppedOther(String reason) {
+    return 'Stopped ($reason)';
+  }
+
+  @override
+  String agentsErrAuth(String agent) {
+    return '$agent needs you to sign in on the computer: run it once in a terminal there and sign in';
+  }
+
+  @override
+  String get agentsErrUnavailable => 'This agent isn’t installed on the computer';
+
+  @override
+  String get agentsErrExited => 'The agent quit unexpectedly';
+
+  @override
+  String agentsErrOther(String message) {
+    return 'Something went wrong: $message';
+  }
+
+  @override
+  String get agentsContextLost => 'The agent restarted without its earlier context';
+
+  @override
+  String get agentsOffline => 'The computer isn’t connected. You can write again once it’s back';
+
+  @override
+  String get agentsBusy => 'The agent is still working';
+
+  @override
+  String agentsSendFailed(String code) {
+    return 'Couldn’t send ($code)';
+  }
+
+  @override
+  String get agentsEnv => 'Environment variables';
+
+  @override
+  String get agentsEnvNone => 'None';
+
+  @override
+  String agentsEnvCount(int count) {
+    return '$count set';
+  }
+
+  @override
+  String agentsEnvTitle(String agent) {
+    return 'Environment for $agent';
+  }
+
+  @override
+  String get agentsEnvHint =>
+      'Applies the next time the agent starts. Kept encrypted on this phone and sent only to this computer, which keeps it in memory and never writes it to disk';
+
+  @override
+  String get agentsEnvName => 'Name';
+
+  @override
+  String get agentsEnvValue => 'Value';
+
+  @override
+  String get agentsEnvBadName => 'Use letters, digits and underscores, not starting with a digit';
+
+  @override
+  String agentsEnvRemove(String name) {
+    return 'Remove $name';
+  }
+
+  @override
+  String get agentsEnvShow => 'Show values';
+
+  @override
+  String get agentsEnvHide => 'Hide values';
+
+  @override
+  String get agentsEnvSaveFailed => 'Couldn’t save the environment variables';
+
+  @override
+  String get agentsBypass => 'Skip permission prompts';
+
+  @override
+  String get agentsBypassHintMode => 'The agent stops asking first. Turn it off any time';
+
+  @override
+  String get agentsBypassHintRestart => 'The agent stops asking first. Switching restarts it (between turns only)';
+
+  @override
+  String get agentsBypassTag => 'skips prompts';
+
+  @override
+  String agentsBypassRiskTitle(String agent) {
+    return 'Let $agent run commands and change files without asking?';
+  }
+
+  @override
+  String get agentsBypassRiskBody =>
+      'It will no longer ask before anything it does on the computer, including deleting files, going online and installing software. Using the phone still follows this phone’s confirmation settings.';
+
+  @override
+  String get agentsBypassRiskAction => 'Skip prompts';
+
+  @override
+  String get agentsErrBypass => 'This agent can’t skip permission prompts';
+
+  @override
+  String get agentsEarlier => 'Sessions in this folder';
+
+  @override
+  String agentsEarlierEmpty(String agent) {
+    return 'No $agent sessions here yet';
+  }
+
+  @override
+  String agentsEarlierUnlisted(String agent) {
+    return '$agent doesn’t list its earlier sessions; only ones started from this phone show';
+  }
+
+  @override
+  String agentsEarlierFailed(String agent, String code) {
+    return 'Couldn’t read $agent’s earlier sessions ($code)';
+  }
+
+  @override
+  String agentsEarlierOnComputer(String when) {
+    return 'On the computer · $when';
+  }
+
+  @override
+  String agentsEarlierNoLoad(String agent) {
+    return '$agent can’t reopen earlier sessions';
+  }
+
+  @override
+  String get agentsResumed => 'Continuing an earlier session; above is the history the agent kept';
+
+  @override
+  String get agentsErrResume => 'This agent can’t reopen earlier sessions';
+
+  @override
+  String agentsErrMode(String mode) {
+    return 'The agent didn’t switch modes: $mode';
+  }
+
+  @override
+  String get agentsSubfolders => 'Folders inside';
+
+  @override
+  String agentsBypassOnNote(String agent) {
+    return 'Skipping permission prompts: $agent runs commands and changes files without asking';
+  }
+
+  @override
   String get stateWorkspaceFilesHint => 'Files uploaded to the current workspace:';
 
   @override
@@ -14533,6 +14964,9 @@ class L10nEn extends L10n {
 
   @override
   String get searchKwPhoneReturn => 'return,come back';
+
+  @override
+  String get searchKwPhoneComputers => 'computer,agent,Claude Code,Codex,OpenCode,Antigravity,SSH,MCP,remote control';
 
   @override
   String get searchKwPhoneBackgroundGuide => 'background confirmation,return';

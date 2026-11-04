@@ -57,6 +57,15 @@ Run these commands from the repository root. Select checks relevant to your chan
 ```bash
 (cd packages/dsh_client && dart pub get && dart analyze && dart test)
 (cd packages/dsh_remote && dart pub get && dart analyze && dart test)
+(cd packages/dsh_link && dart pub get && dart analyze && dart test)
+```
+
+**dsh-go-link (agents on computers using the phone):** edit `host/dsh-go-link/bin/dsh-go-link.cjs`, test it, then copy it into the app asset the app installs over SSH:
+
+```bash
+node --test host/dsh-go-link/test/*.test.mjs
+node host/dsh-go-link/scripts/sync-asset.mjs
+node host/dsh-go-link/scripts/sync-asset.mjs --check
 ```
 
 **Plugin SDK:**

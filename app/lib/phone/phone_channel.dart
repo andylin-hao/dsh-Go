@@ -284,6 +284,8 @@ class PhoneTaskStatus {
     this.paused = false,
     this.stopped = false,
     this.waived = false,
+    this.origin,
+    this.stoppedByPerson = false,
   });
 
   factory PhoneTaskStatus.fromMap(Map<Object?, Object?> m) => PhoneTaskStatus(
@@ -293,6 +295,8 @@ class PhoneTaskStatus {
     paused: _flag(m['paused']),
     stopped: _flag(m['stopped']),
     waived: _flag(m['waived']),
+    origin: PhoneOrigin.tryParse(m['origin']),
+    stoppedByPerson: _flag(m['stoppedByPerson']),
   );
 
   /// The current (or last) task's number; a new one means a new task even
@@ -305,12 +309,42 @@ class PhoneTaskStatus {
   final String? app;
   final bool paused;
 
-  /// The person pressed 停止 (overlay or notification); native refuses phone
-  /// actions for a short while after. The app cancels the running turn.
+  /// The task was stopped (停止, screen off, the service going away); native
+  /// refuses phone actions for a short while after. The app cancels the
+  /// running local turn.
   final bool stopped;
+
+  /// [stopped] because the person asked (停止 on the bar, in the app or the
+  /// notification, or while confirming). Only then does a computer agent's
+  /// turn stop too: screen off or a lost service ends the phone task alone.
+  final bool stoppedByPerson;
 
   /// 本任务免确认 was granted: the rest of this task asks nothing.
   final bool waived;
+
+  /// An agent on a computer drives (or, while [stopped], drove) the task; null for this phone's engine.
+  final PhoneOrigin? origin;
+}
+
+/// An agent on a computer that drives a phone task through dsh-go-link (native `PhoneOrigin`).
+class PhoneOrigin {
+  const PhoneOrigin({required this.key, required this.label, this.client, this.host});
+
+  static PhoneOrigin? tryParse(Object? v) {
+    final m = _map(v);
+    final key = _text(m['key']);
+    final label = _text(m['label']);
+    if (key == null || label == null) return null;
+    return PhoneOrigin(key: key, label: label, client: _text(m['client']), host: _text(m['host']));
+  }
+
+  /// `ssh:<host id>/<channel>`: one agent connection.
+  final String key;
+
+  /// "Claude Code · dev-box".
+  final String label;
+  final String? client;
+  final String? host;
 }
 
 /// Where Android 13+'s 「受限制的设置」 stands for this app (native
@@ -873,6 +907,7 @@ class PhoneLogEntry {
     this.summary = '',
     this.decision = PhoneDecision.unknown,
     this.rawDecision,
+    this.origin,
   });
 
   factory PhoneLogEntry.fromMap(Map<Object?, Object?> m) => PhoneLogEntry(
@@ -882,6 +917,7 @@ class PhoneLogEntry {
     summary: _text(m['summary']) ?? '',
     decision: PhoneDecision.parse(m['decision']),
     rawDecision: _text(m['decision']),
+    origin: _text(m['origin']),
   );
 
   /// Epoch milliseconds (seconds tolerated) or an ISO string; null if neither.
@@ -902,6 +938,9 @@ class PhoneLogEntry {
   final String summary;
   final PhoneDecision decision;
   final String? rawDecision;
+
+  /// Who made the call when it wasn't this phone's engine ("Claude Code · dev-box").
+  final String? origin;
 }
 
 // ── Channel ──────────────────────────────────────────────────────────────────
@@ -1105,6 +1144,38 @@ class PhoneChannel {
       return const PhoneFinish();
     }
   }
+
+  // ── Agents on computers (dsh-go-link) ──────────────────────────────────────
+
+  /// The tool list, instructions and server info dsh-go-link serves to agents; empty when absent.
+  Future<Map<String, Object?>> remoteCatalog() async {
+    try {
+      final map = await _methods.invokeMapMethod<String, Object?>('remoteCatalog');
+      return map ?? const {};
+    } on MissingPluginException {
+      return const {};
+    } on PlatformException {
+      return const {};
+    }
+  }
+
+  /// A dispatcher for one agent connection; [key] tells task owners apart, [client] and [host] label it.
+  Future<bool> remoteOpen(String ch, {required String key, String? client, required String host}) =>
+      _bool('remoteOpen', {'ch': ch, 'key': key, 'client': client, 'host': host});
+
+  /// One JSON-RPC line from the agent; the answer to send back, or null. A tool call returns when
+  /// the phone is done, which can take minutes. Throws when the native side can't take it.
+  Future<String?> remoteLine(String ch, String line) =>
+      _methods.invokeMethod<String>('remoteLine', {'ch': ch, 'line': line});
+
+  /// An agent session's turn ended on the computer: the phone task [key]'s agent owns ends with it.
+  Future<bool> remoteFinish(String key) => _bool('remoteFinish', {'key': key});
+
+  /// Keeps the app running in the background (a foreground service) while [on]: computer links.
+  Future<bool> linkService(bool on) => _bool('linkService', {'on': on});
+
+  /// The agent connection [ch] is gone (null: all of them).
+  Future<bool> remoteClose([String? ch]) => _bool('remoteClose', {'ch': ch});
 
   Future<bool> _bool(String method, [Object? args]) async {
     try {

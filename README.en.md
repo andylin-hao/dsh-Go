@@ -25,6 +25,20 @@
   <sub>#1 on Trendshift's all-language daily ranking · 2026-10-30</sub>
 </p>
 
+## What this fork adds: agents on your computers
+
+This is a fork of [ccch1mneyyy/dsh-go](https://github.com/ccch1mneyyy/dsh-go) by [ccch1mneyyy](https://github.com/ccch1mneyyy). On top of DSH Go, it lets the coding agents on your computers (Claude Code, Codex, Antigravity, OpenCode, Gemini CLI) use this phone, and lets you drive them from the phone.
+
+- **Agents use the phone**: an agent that registers one MCP server gets the same phone tools as DSH to read the screen, tap and type. Confirmation, app rules and lifted limits work as they do locally, and approval cards, the floating bar and the action log name the agent and the computer. One agent uses the phone at a time.
+- **Two ways to connect**: turn on an SSH host and the app installs and starts dsh-go-link on that computer; DSH isn't needed there. A computer without SSH can be paired on the local network with a QR code (encrypted with Noise IK; you compare the key fingerprint, and only paired phones get in).
+- **Drive agents from the phone**: **Agents on computers** in the drawer starts sessions on the computer over ACP. Pick the agent and a folder, then follow the answer, its thinking, tool calls with their changes and its plan, and answer its permission requests on the phone. A session's agent gets this phone's tools by itself.
+- **Sessions keep going**: sessions run on the computer, so closing the app, losing the connection or locking the phone doesn't interrupt them, and they catch up when you're back. Only your Stop ends a turn; the screen turning off or accessibility dropping only stops the phone actions. An update of dsh-go-link waits for working agents to finish.
+- **Continue earlier sessions**: the agent's sessions in a folder are listed, including ones started in a terminal on the computer. Opening one that still runs just attaches to it; the others continue with their history.
+- **Environment and bypass**: per-agent environment variables (encrypted on the phone, kept in memory on the computer), and an option to skip the agent's permission prompts (Claude Code's bypassPermissions, Codex's full access, Antigravity's `--dangerously-skip-permissions`). You confirm each time you turn it on.
+
+The computer side is a single-file Node script with no dependencies, [`host/dsh-go-link`](host/dsh-go-link/) (Node 18 or later); the phone side is [`packages/dsh_link`](packages/dsh_link/) and `app/lib/remote/link/`. See [Phone control › Computers](docs/guide/en/04-phone-control.md#computers) for how to use it, and [docs/design/remote-agents.md](docs/design/remote-agents.md) for the design and what was verified. So far Claude Code, Codex and Antigravity have been checked on a vivo phone (Android 16) over the local network; the SSH path hasn't been run on a phone yet.
+
+
 <br>
 
 <h3 align="center">Deepy and Whale girl keep you company</h3>
@@ -297,6 +311,8 @@ DSH_BETA_TOKEN_FILE= bash tooling/build-apk.sh --dry-run -f all
 | `app/` | Flutter interface and Android Kotlin platform code |
 | `packages/dsh_client/` | Dart client for the DSH Web API |
 | `packages/dsh_remote/` | Dart client for DSH Remote |
+| `packages/dsh_link/` | The phone end of dsh-go-link: link protocol, phone tool routing, agent session transcripts |
+| `host/dsh-go-link/` | dsh-go-link for computers (one Node script): daemon, MCP entry, network pairing, ACP agent sessions |
 | `runtime/` | Linux runtime assembly, engine patches and the app bridge |
 | `sdk/plugin-kit/` | Native plugin authoring kit, used from the repository and not published to npm |
 | `examples/plugins/` | Example plugins |

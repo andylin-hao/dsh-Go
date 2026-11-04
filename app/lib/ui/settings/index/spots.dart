@@ -669,6 +669,14 @@ abstract final class Spots {
     keywords: (l) => l.searchKwPhoneReturn,
     condition: SpotCondition.phoneControlOn,
   );
+  /// 电脑: SSH hosts whose agents (Claude Code, Codex, …) may use the phone (a card of switches).
+  static final phoneComputers = SettingSpot(
+    'phone-computers',
+    page: SettingsPageId.phone,
+    title: (l) => l.phoneLinkTitle,
+    keywords: (l) => l.searchKwPhoneComputers,
+    condition: SpotCondition.phoneControlOn,
+  );
   static final phoneBackgroundGuide = SettingSpot(
     'phone-background-guide',
     page: SettingsPageId.phone,
@@ -1046,6 +1054,7 @@ final _rows = <SettingSpot>[
   Spots.phoneConfirm,
   Spots.phoneAutoCollapse,
   Spots.phoneReturn,
+  Spots.phoneComputers,
   Spots.phoneBackgroundGuide,
   Spots.pluginsMarket,
   Spots.webSearchKey,

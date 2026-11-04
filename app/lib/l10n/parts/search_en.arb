@@ -72,6 +72,7 @@
   "searchKwPhoneConfirm": "don't ask,confirm,always ask,no confirmation",
   "searchKwPhoneAutoCollapse": "floating bar,collapse,bubble",
   "searchKwPhoneReturn": "return,come back",
+  "searchKwPhoneComputers": "computer,agent,Claude Code,Codex,OpenCode,Antigravity,SSH,MCP,remote control",
   "searchKwPhoneBackgroundGuide": "background confirmation,return",
   "searchKwAutoStart": "auto start,launch",
   "searchKwAutoSafe": "safe mode,automatic safe mode",

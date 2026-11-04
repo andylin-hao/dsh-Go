@@ -77,6 +77,7 @@ const _sections = {
   'wallpaper',
   'permission-current',
   'permission-default',
+  'phone-computers',
   'ui-mode',
   'quick-panel',
   'table-tint',

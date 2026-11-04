@@ -66,17 +66,22 @@ class PhoneCore(
         val decision: String? = null,
     )
 
-    fun call(name: String, args: Map<String, Any?>): ToolOutput {
+    /**
+     * One tool call by [origin] (null: this phone's engine; else an agent on a computer). Someone
+     * other than the running task's owner is turned away here, before it queues behind the owner.
+     */
+    fun call(name: String, args: Map<String, Any?>, origin: PhoneOrigin? = null): ToolOutput {
+        tasks.refusalFor(origin)?.let { return ToolOutput(it, isError = true) }
         // In flight from here until the result goes back: no turn ends while a call runs (PhoneTasks.finish).
         tasks.callStarted()
         try {
-            return runCall(name, args)
+            return runCall(name, args, origin)
         } finally {
-            tasks.callEnded()
+            tasks.callEnded(origin)
         }
     }
 
-    private fun runCall(name: String, args: Map<String, Any?>): ToolOutput {
+    private fun runCall(name: String, args: Map<String, Any?>, origin: PhoneOrigin?): ToolOutput {
         if (name !in PhoneToolCatalog.names) {
             // l10n:keep agent tool result
             return ToolOutput("没有这个手机工具：$name。可用：${PhoneToolCatalog.names.joinToString("、")}", isError = true)
@@ -85,8 +90,8 @@ class PhoneCore(
             // l10n:keep agent tool result
             return ToolOutput("手机操控已在 DSH 设置里关闭。请用户在 设置 → 手机操控 里打开后重启引擎。", isError = true)
         }
-        val outcome = worker.run(budgetMs(name), MAX_TOTAL_MS) { scope -> execute(name, Args(args), scope) }
-        tasks.touch()
+        val outcome = worker.run(budgetMs(name), MAX_TOTAL_MS) { scope -> execute(name, Args(args), scope, origin) }
+        tasks.touch(origin)
         val out = when (outcome) {
             is SerialWorker.Outcome.Done -> outcome.value
             is SerialWorker.Outcome.TimedOut -> {
@@ -108,7 +113,7 @@ class PhoneCore(
                 decision = "error",
             )
         }
-        out.summary?.let { log.add(name, out.app, it, out.decision ?: if (out.error) "error" else "ok") }
+        out.summary?.let { log.add(name, out.app, it, out.decision ?: if (out.error) "error" else "ok", origin?.label) }
         noteRefusal(name, out.decision)
         val interjections = tasks.drainInterjections()
         val text = buildString {
@@ -131,8 +136,8 @@ class PhoneCore(
         }
     }
 
-    private fun execute(name: String, a: Args, scope: SerialWorker.Scope): Out {
-        when (val b = tasks.begin()) {
+    private fun execute(name: String, a: Args, scope: SerialWorker.Scope, origin: PhoneOrigin?): Out {
+        when (val b = tasks.begin(origin)) {
             is PhoneTasks.Begin.Refused -> return Out(b.message + "。", error = true, summary = name, decision = "stopped")
             is PhoneTasks.Begin.Go -> Unit
         }

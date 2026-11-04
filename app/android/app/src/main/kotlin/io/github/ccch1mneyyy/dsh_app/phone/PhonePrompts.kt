@@ -8,6 +8,8 @@ import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import io.github.ccch1mneyyy.dsh_app.MainActivity
+import io.github.ccch1mneyyy.dsh_app.R
+import io.github.ccch1mneyyy.dsh_app.i18n.AppStrings
 
 /** One asynchronous UI coordinator for native SafetyGate and structured engine requests. */
 class PhonePrompts(
@@ -63,11 +65,19 @@ class PhonePrompts(
     fun stopAll() = arbiter.stopAll()
     fun check() = arbiter.check()
 
+    /** Names the agent on a computer that asks, before the sentence; this phone's own engine asks as before. */
+    private fun withOrigin(text: String): String {
+        val who = tasks.activeOrigin() ?: return text
+        return AppStrings.get(app, R.string.phone_origin_asks, who.label, text)
+    }
+
     override fun confirm(request: ConfirmRequest): Decision {
         if (Looper.myLooper() == Looper.getMainLooper()) return Decision.UNAVAILABLE
         val taskOwner = tasks.activeOwner() ?: return Decision.STOP
+        // Every surface (overlay card, heads-up, in-app card) shows the sentence: it carries the origin.
+        val shown = request.copy(sentence = withOrigin(request.sentence))
         val ticket = arbiter.begin(null, nativeOwner,
-            PromptContent(PromptKind.NATIVE_CONFIRM, request.sentence.take(4096), request), request.timeoutMs.coerceIn(1, 30_000),
+            PromptContent(PromptKind.NATIVE_CONFIRM, shown.sentence.take(4096), shown), shown.timeoutMs.coerceIn(1, 30_000),
             { enabled() && !locked() && tasks.isCurrent(taskOwner) }) ?: return Decision.UNAVAILABLE
         schedule(ticket)
         return when (ticket.await().outcome) {
@@ -85,7 +95,7 @@ class PhonePrompts(
     override fun handoff(reason: String, timeoutMs: Long, cause: HandoffCause?): HandoffResult {
         if (Looper.myLooper() == Looper.getMainLooper()) return HandoffResult.STOP
         val taskOwner = tasks.activeOwner() ?: return HandoffResult.STOP
-        val ticket = arbiter.begin(null, nativeOwner, PromptContent(PromptKind.HANDOFF, reason.take(4096), cause = cause),
+        val ticket = arbiter.begin(null, nativeOwner, PromptContent(PromptKind.HANDOFF, withOrigin(reason.take(4096)), cause = cause),
             timeoutMs.coerceIn(1, 600_000), { enabled() && !locked() && tasks.isCurrent(taskOwner) }) ?: return HandoffResult.STOP
         schedule(ticket)
         return when (ticket.await().outcome) {

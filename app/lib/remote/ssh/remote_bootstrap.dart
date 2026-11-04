@@ -335,7 +335,10 @@ printf 'DSHAPP dsh %s\n' "$(command -v dsh)"
     if (noDsh || (exited && _looksNotFound(tail))) {
       throw HostLinkError(
         HostLinkErrorKind.dshNotFound,
-        customCommand ? appL10n.remoteErrCommandNotFound(command) : appL10n.remoteErrDshMissing,
+        // Phone control alone (dsh-go-link) needs no DSH on the host: say so where people meet this.
+        customCommand
+            ? appL10n.remoteErrCommandNotFound(command)
+            : '${appL10n.remoteErrDshMissing}\n${appL10n.remoteErrDshMissingPhoneLink}',
         detail: [
           if (!customCommand) 'npm install -g @deepseek-ai/dsh',
           if (!customCommand) appL10n.remoteStartCommandExample,

@@ -25,6 +25,20 @@
   <sub>Trendshift 全语言日榜 #1 · 2026-10-30</sub>
 </p>
 
+## 本分支新增：电脑上的智能体
+
+这是 [ccch1mneyyy/dsh-go](https://github.com/ccch1mneyyy/dsh-go)（原作者 [ccch1mneyyy](https://github.com/ccch1mneyyy)）的分支。在原版 DSH Go 之上，它让你电脑上的编程智能体（Claude Code、Codex、Antigravity、OpenCode、Gemini CLI）使用这台手机，你也能在手机上直接驱动它们。
+
+- **智能体用手机**：电脑上的智能体登记一个 MCP 服务器后，就能用和 DSH 一样的手机工具读屏、点按、输入。确认方式、应用名单和解除限制与本机一致；确认卡、悬浮条和操作记录写明是哪个智能体、哪台电脑。同一时间只有一个智能体能用手机。
+- **两种连接**：按 SSH 主机开关，App 自动在电脑上安装并启动 dsh-go-link，电脑上不需要装 DSH；没开 SSH 的电脑可以在局域网里扫码配对（Noise IK 加密，核对密钥指纹，只接受配对过的手机）。
+- **在手机上驱动智能体**：抽屉里的 **电脑上的智能体** 经 ACP 在电脑上开新对话。选智能体和文件夹，就能看回答、思考、工具调用与改动、计划，并在手机上回答它的权限提问。对话里的智能体自动带上这台手机的工具。
+- **对话不中断**：对话在电脑上运行，关掉 App、断网或锁屏都不影响，回来后自动补上。只有你按下停止才会停下它这一轮；熄屏或无障碍断开只停下手机上的操作。更新 dsh-go-link 时，会等正在工作的智能体做完再换。
+- **接着之前的对话**：列出某个文件夹里这个智能体的对话，包括在电脑终端里开始的。还在运行的只是接上去看，不会打断；其它的带着历史继续。
+- **环境变量与跳过确认**：按智能体设置环境变量（加密存在手机上，电脑只放在内存里）；可以让智能体跳过权限确认：Claude Code 的 bypassPermissions、Codex 的完全访问、Antigravity 的 `--dangerously-skip-permissions`。每次打开都要确认。
+
+电脑端是无依赖的单文件 Node 脚本 [`host/dsh-go-link`](host/dsh-go-link/)（Node 18 及以上），手机端在 [`packages/dsh_link`](packages/dsh_link/) 和 `app/lib/remote/link/`。用法见[手机操控 › 电脑](docs/guide/zh/04-phone-control.md#电脑)，设计与验证记录见 [docs/design/remote-agents.md](docs/design/remote-agents.md)。目前在 vivo（Android 16）上走局域网验证过 Claude Code、Codex 和 Antigravity；SSH 路径还没在真机上跑过。
+
+
 <br>
 
 <h3 align="center">Deepy 和鲸娘，陪你干活</h3>
@@ -297,6 +311,8 @@ DSH_BETA_TOKEN_FILE= bash tooling/build-apk.sh --dry-run -f all
 | `app/` | Flutter 界面与 Android Kotlin 平台实现 |
 | `packages/dsh_client/` | DSH Web API 的 Dart 客户端 |
 | `packages/dsh_remote/` | DSH Remote 的 Dart 客户端 |
+| `packages/dsh_link/` | dsh-go-link 的手机端：链路协议、手机工具路由、智能体对话记录 |
+| `host/dsh-go-link/` | 电脑端 dsh-go-link（单文件 Node 脚本）：守护进程、MCP 入口、局域网配对、ACP 智能体对话 |
 | `runtime/` | Linux 运行时打包、引擎补丁与 App 桥接 |
 | `sdk/plugin-kit/` | 原生插件作者工具包；在仓库中使用，未发布到 npm |
 | `examples/plugins/` | 插件示例 |

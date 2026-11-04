@@ -573,7 +573,7 @@ internal class ControlOverlay(private val service: AccessibilityService) : UserG
         clearStoppedLater()
         announce(s(R.string.overlay_stopped))
         // l10n:keep agent stop reason
-        PhoneRegistry.controlListener?.onStopRequested("你在悬浮条上点了停止")
+        PhoneRegistry.controlListener?.onStopRequested("你在悬浮条上点了停止", byPerson = true)
     }
 
     private fun announce(text: String) {

@@ -145,6 +145,11 @@
     <string name="pet_answer_failed">没成功，去 App 里处理</string>
     <!-- phone -->
     <string name="phone_running">DSH 正在操作手机</string>
+    <!-- An agent on a computer (dsh-go-link) asks: "Claude Code · dev-box: Tap “Send”". -->
+    <string name="phone_origin_asks">%1$s：%2$s</string>
+    <!-- dsh-go-link: the foreground notification while computers may use the phone. -->
+    <string name="phone_link_channel">电脑</string>
+    <string name="phone_link_running">已连接电脑：上面的智能体可以使用这台手机</string>
     <string name="phone_a11y_connecting">无障碍服务还没连上，稍等几秒再试，或到系统设置里关掉再打开。</string>
     <string name="phone_a11y_off">还没有开启无障碍。</string>
     <string name="phone_a11y_unavailable">无障碍现在不可用。</string>

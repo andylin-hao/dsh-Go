@@ -12,6 +12,10 @@ import java.util.concurrent.CopyOnWriteArrayList
  *
  * After a stop, calls are refused until [stopHoldMs] pass without any: the turn that was running
  * gets "已停止" on every retry, and the next turn starts a fresh task. Plain Kotlin (injected clock).
+ *
+ * Every task has one owner ([PhoneOrigin]; null = this phone's own engine). While it runs, calls
+ * from anyone else are refused as busy and never touch its clock, approvals or pause. Only the
+ * stopped owner's retries extend a stop's hold; others are refused for its length without it.
  */
 class PhoneTasks(
     private val clock: () -> Long = System::currentTimeMillis,
@@ -31,9 +35,18 @@ class PhoneTasks(
         val waived: Boolean = false,
         /** Native-only lifetime; never inferred from a session id or a Flutter page. */
         internal val lifecycle: Long = 0,
+        /** Who drives (or, within a stop's hold, drove) the task: null for this phone's engine. */
+        val origin: PhoneOrigin? = null,
+        /**
+         * Within the hold after a stop the person asked for (停止 on the bar, in the app or the
+         * notification, or while confirming), not one of screen off or the service going away. Only
+         * that stop also ends a computer agent's turn; the others end the phone task alone.
+         */
+        val stoppedByPerson: Boolean = false,
     ) {
         fun toMap(): Map<String, Any?> =
-            linkedMapOf("id" to id, "active" to active, "app" to app, "paused" to paused, "stopped" to stopped, "waived" to waived)
+            linkedMapOf("id" to id, "active" to active, "app" to app, "paused" to paused, "stopped" to stopped, "waived" to waived,
+                "origin" to origin?.toMap(), "stoppedByPerson" to stoppedByPerson)
     }
 
     sealed interface Begin {
@@ -49,6 +62,7 @@ class PhoneTasks(
     private var lastCallAt = 0L
     private var stoppedUntil = 0L
     private var stopReason: String? = null
+    private var stoppedByPerson = false
     private val approved = LinkedHashSet<String>()
     private var waived = false
     private val notified = HashSet<String>()
@@ -56,6 +70,10 @@ class PhoneTasks(
     private var paused = false
     private val interjections = ArrayList<String>()
     private var inFlight = 0
+    private var owner: PhoneOrigin? = null
+    /** The last task's owner, kept after it ends: a stop with nothing running belongs to it. */
+    private var lastOwner: PhoneOrigin? = null
+    private var stoppedOwner: PhoneOrigin? = null
     private val listeners = CopyOnWriteArrayList<(Snapshot) -> Unit>()
 
     fun addListener(l: (Snapshot) -> Unit) {
@@ -66,23 +84,21 @@ class PhoneTasks(
         listeners -= l
     }
 
-    /** Called at the start of every phone tool call. */
-    fun begin(): Begin {
+    /** Called at the start of every phone tool call, by [origin] (null: this phone's engine). */
+    fun begin(origin: PhoneOrigin? = null): Begin {
         var started = false
         val result: Begin
         synchronized(lock) {
             val now = clock()
-            if (now < stoppedUntil) {
-                stoppedUntil = now + stopHoldMs
-                return Begin.Refused(STOPPED_MESSAGE + (stopReason?.let { "（$it）" } ?: ""))
-            }
-            // This call is in flight already, so only the pause and the clock count here.
-            if (active && !paused && now - lastCallAt > idleMs) endLocked()
+            refusalLocked(origin, now)?.let { return Begin.Refused(it) }
             if (!active) {
                 active = true
                 taskId = nextId++
                 lifecycle++
                 stopReason = null
+                stoppedByPerson = false
+                owner = origin
+                lastOwner = origin
                 started = true
             }
             lastCallAt = now
@@ -92,9 +108,38 @@ class PhoneTasks(
         return result
     }
 
-    /** Marks activity at the end of a call too (a long handoff must not count as idle). */
-    fun touch() = synchronized(lock) {
-        if (active) lastCallAt = clock()
+    /**
+     * Why [origin] can't drive the phone now because someone else owns it (busy, or another
+     * owner's stop hold), without changing anything: lets it be turned away before it queues
+     * behind the owner's calls. Null otherwise, also for the stopped owner's own retries, which
+     * [begin] refuses (and logs) as before. With only this phone's engine it is always null.
+     */
+    fun refusalFor(origin: PhoneOrigin?): String? = synchronized(lock) {
+        val now = clock()
+        when {
+            now < stoppedUntil -> if (stoppedOwner?.key != origin?.key) JUST_STOPPED_MESSAGE else null
+            active && !paused && now - lastCallAt > idleMs -> null // idle: begin ends it
+            active && owner?.key != origin?.key -> busyMessage(owner)
+            else -> null
+        }
+    }
+
+    private fun refusalLocked(origin: PhoneOrigin?, now: Long): String? {
+        if (now < stoppedUntil) {
+            if (stoppedOwner?.key != origin?.key) return JUST_STOPPED_MESSAGE
+            // The turn that was stopped keeps retrying: it stays refused until it goes quiet.
+            stoppedUntil = now + stopHoldMs
+            return STOPPED_MESSAGE + (stopReason?.let { "（$it）" } ?: "")
+        }
+        // This call is in flight already, so only the pause and the clock count here.
+        if (active && !paused && now - lastCallAt > idleMs) endLocked()
+        if (active && owner?.key != origin?.key) return busyMessage(owner)
+        return null
+    }
+
+    /** Marks activity at the end of a call too (a long handoff must not count as idle). Only the owner's. */
+    fun touch(origin: PhoneOrigin? = null) = synchronized(lock) {
+        if (active && owner?.key == origin?.key) lastCallAt = clock()
     }
 
     /** Ends an idle task; returns whether one ended. Run periodically so listeners hear it in time. */
@@ -107,11 +152,14 @@ class PhoneTasks(
         return true
     }
 
-    fun stop(reason: String) {
+    /** Stops the task for [reason]; [byPerson] when the person asked (see [Snapshot.stoppedByPerson]). */
+    fun stop(reason: String, byPerson: Boolean = false) {
         synchronized(lock) {
+            stoppedOwner = if (active) owner else lastOwner
             if (active) endLocked() else lifecycle++
             stoppedUntil = clock() + stopHoldMs
             stopReason = reason
+            stoppedByPerson = byPerson
             paused = false
             lock.notifyAll()
         }
@@ -128,15 +176,44 @@ class PhoneTasks(
         fire()
     }
 
+    /** [origin]'s agent went away: its task ends now (no stop hold), unless one of its calls still runs. */
+    fun endIfOwner(origin: PhoneOrigin) {
+        synchronized(lock) {
+            if (!active || owner?.key != origin.key || inFlight > 0) return
+            endLocked()
+            lock.notifyAll()
+        }
+        fire()
+    }
+
+    /**
+     * The turn of [key]'s agent ended (an agent session on a computer, over dsh-go-link): ends the
+     * task it owns, and a stop's hold on it, as [finish] does for this phone's engine. False when it
+     * owns nothing now or a call is still running.
+     */
+    fun finishOwnedBy(key: String): Boolean {
+        synchronized(lock) {
+            val holder = if (active) owner else if (clock() < stoppedUntil) stoppedOwner else null
+            if (holder?.key != key || inFlight > 0) return false
+            if (active) endLocked() else lifecycle++
+            stoppedUntil = 0L
+            stopReason = null
+            stoppedByPerson = false
+            lock.notifyAll()
+        }
+        fire()
+        return true
+    }
+
     /** A tool call came in; [callEnded] once its result goes back. */
     fun callStarted() = synchronized(lock) {
         inFlight++
     }
 
-    fun callEnded() = synchronized(lock) {
+    fun callEnded(origin: PhoneOrigin? = null) = synchronized(lock) {
         if (inFlight > 0) inFlight--
-        // The idle clock starts when the last result went back, however long the call took.
-        if (active) lastCallAt = clock()
+        // The idle clock starts when the owner's last result went back, however long the call took.
+        if (active && owner?.key == origin?.key) lastCallAt = clock()
     }
 
     /** Tool calls between [callStarted] and [callEnded] right now. */
@@ -160,6 +237,7 @@ class PhoneTasks(
             if (active) endLocked() else lifecycle++
             stoppedUntil = 0L
             stopReason = null
+            stoppedByPerson = false
             owner = Owner(taskId, lifecycle, false)
             lock.notifyAll()
         }
@@ -206,12 +284,15 @@ class PhoneTasks(
         return true
     }
 
+    /** The person chose 停止 while [owner]'s step waited for them (confirmation, handoff). */
     fun stopIfCurrent(owner: Owner, reason: String): Boolean {
         synchronized(lock) {
             if (!currentLocked(owner)) return false
+            stoppedOwner = if (active) this.owner else lastOwner
             if (active) endLocked() else lifecycle++
             stoppedUntil = clock() + stopHoldMs
             stopReason = reason
+            stoppedByPerson = true
             paused = false
             lock.notifyAll()
         }
@@ -238,6 +319,7 @@ class PhoneTasks(
             lifecycle++
             stoppedUntil = 0L
             stopReason = null
+            stoppedByPerson = false
         }
         fire()
     }
@@ -326,9 +408,14 @@ class PhoneTasks(
     fun snapshot(): Snapshot = synchronized(lock) {
         val now = clock()
         val idle = idleLocked(now)
-        Snapshot(taskId, active && !idle, if (active && !idle) app else null, paused, now < stoppedUntil, stopReason,
-            active && !idle && waived, lifecycle)
+        val stopped = now < stoppedUntil
+        Snapshot(taskId, active && !idle, if (active && !idle) app else null, paused, stopped, stopReason,
+            active && !idle && waived, lifecycle, if (active && !idle) owner else if (stopped) stoppedOwner else null,
+            stopped && stoppedByPerson)
     }
+
+    /** The running task's owner (null: none, or this phone's engine). */
+    fun activeOrigin(): PhoneOrigin? = synchronized(lock) { if (active && !idleLocked(clock())) owner else null }
 
     /** Idle: no call running, not paused, and nothing for [idleMs]. */
     private fun idleLocked(now: Long): Boolean = active && !paused && inFlight == 0 && now - lastCallAt > idleMs
@@ -342,6 +429,7 @@ class PhoneTasks(
         interjections.clear()
         app = null
         paused = false
+        owner = null
     }
 
     private fun fire() {
@@ -357,23 +445,32 @@ class PhoneTasks(
     companion object {
         // l10n:keep agent stop protocol
         const val STOPPED_MESSAGE = "用户已停止本次手机操作。不要再调用手机工具，直接告诉用户已经停下"
+
+        // l10n:keep agent tool result
+        const val JUST_STOPPED_MESSAGE = "[PHONE_STOPPED] 用户刚停止了手机上的操作，这一步没有执行。过半分钟再试，或先问用户。"
+
+        // l10n:keep agent tool result
+        fun busyMessage(owner: PhoneOrigin?): String =
+            "[PHONE_BUSY] 手机正被「${owner?.label ?: "这台手机上的 DSH"}」使用，这一步没有执行。等它结束后再试，或告诉用户。"
     }
 }
 
 /** What the agent did, without screen contents, for the person to review. Newest last; [toMaps] lists newest first. */
 class ActionLog(private val capacity: Int = 300, private val clock: () -> Long = System::currentTimeMillis) {
-    data class Entry(val time: Long, val tool: String, val app: String?, val summary: String, val decision: String)
+    data class Entry(val time: Long, val tool: String, val app: String?, val summary: String, val decision: String, val origin: String? = null)
 
     private val entries = ArrayDeque<Entry>()
 
-    fun add(tool: String, app: String?, summary: String, decision: String) = synchronized(entries) {
-        entries.addLast(Entry(clock(), tool, app, summary, decision))
+    /** [origin]: who made the call, as shown to the person (null for this phone's engine). */
+    fun add(tool: String, app: String?, summary: String, decision: String, origin: String? = null) = synchronized(entries) {
+        entries.addLast(Entry(clock(), tool, app, summary, decision, origin))
         while (entries.size > capacity) entries.removeFirst()
     }
 
     fun toMaps(limit: Int): List<Map<String, Any?>> = synchronized(entries) {
         entries.reversed().take(limit.coerceIn(0, capacity)).map {
-            linkedMapOf("time" to it.time, "tool" to it.tool, "app" to it.app, "summary" to it.summary, "decision" to it.decision)
+            linkedMapOf("time" to it.time, "tool" to it.tool, "app" to it.app, "summary" to it.summary, "decision" to it.decision,
+                "origin" to it.origin)
         }
     }
 

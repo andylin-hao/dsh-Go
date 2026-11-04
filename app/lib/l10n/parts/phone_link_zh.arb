@@ -1,0 +1,137 @@
+{
+  "phoneLinkTitle": "电脑",
+  "phoneLinkHint": "让 SSH 主机上的智能体使用这台手机，比如 Claude Code、Codex、OpenCode、Antigravity。",
+  "phoneLinkNoHosts": "还没有 SSH 主机",
+  "phoneLinkNoHostsHint": "先在主机切换里添加一台，再回这里打开。",
+  "phoneLinkOff": "未开启",
+  "phoneLinkConnecting": "连接中…",
+  "phoneLinkAttached": "已连接 · 还没有智能体",
+  "phoneLinkAttachedAgents": "已连接 · {agents}",
+  "@phoneLinkAttachedAgents": {
+    "placeholders": {
+      "agents": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkWaiting": "重新连接中 · {reason}",
+  "@phoneLinkWaiting": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkErrHostKeyUnknown": "先在 DSH Go 里连接一次这台主机，确认它的密钥",
+  "phoneLinkErrHostKeyChanged": "主机密钥变了，请到主机页面核对",
+  "phoneLinkErrNoShell": "主机上没有 POSIX shell",
+  "phoneLinkErrNodeMissing": "电脑上没有安装 Node.js",
+  "phoneLinkErrNodeOld": "Node.js {version} 太旧，需要 18 或更新的版本",
+  "@phoneLinkErrNodeOld": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkErrInstall": "没能在电脑上安装 dsh-go-link",
+  "phoneLinkErrStart": "dsh-go-link 没能在电脑上启动",
+  "phoneLinkErrRefused": "dsh-go-link 拒绝了连接",
+  "phoneLinkErrReplaced": "另一台手机连上了这台电脑",
+  "phoneLinkErrLost": "连接断开了",
+  "phoneLinkErrSsh": "连不上主机",
+  "phoneLinkWorking": "{agent} 正在操作手机",
+  "@phoneLinkWorking": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkSetup": "设置智能体",
+  "phoneLinkSetupTitle": "「{host}」上的手机工具",
+  "@phoneLinkSetupTitle": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkSetupBody": "给每个智能体登记一次手机工具。它们以「phone」出现，这个开关开着时可用。",
+  "phoneLinkSetupRun": "在终端运行",
+  "phoneLinkSetupAddTo": "加到 {file}",
+  "@phoneLinkSetupAddTo": {
+    "placeholders": {
+      "file": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkSetupLoading": "正在从电脑读取路径…",
+  "phoneLinkSetupFailed": "读取失败：{reason}",
+  "@phoneLinkSetupFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkSetupNote": "确认方式、应用名单和已解除的限制与 DSH 一样生效。智能体按它自报的名字显示，确认前请留意是哪台电脑。",
+  "phoneLinkRiskTitle": "允许「{host}」上的智能体使用这台手机？",
+  "@phoneLinkRiskTitle": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkRiskBody": "它们能读屏、点按和输入，确认方式和限制与 DSH 相同。屏幕文字会发到那台电脑，以及它的智能体所用的模型。",
+  "phoneLinkRiskAction": "允许",
+  "phoneLinkErrUnreachable": "在这个网络上连不到这台电脑",
+  "phoneLinkErrNotPaired": "这台电脑不再接受这台手机，请重新配对",
+  "phoneLinkPair": "配对局域网里的电脑",
+  "phoneLinkPairHint": "适合没开 SSH 的 Mac 或 PC，电脑上需要 Node.js 18 或更新版本",
+  "phoneLinkPairTitle": "配对电脑",
+  "phoneLinkPairStep1": "在电脑上下载 dsh-go-link：",
+  "phoneLinkPairStep2": "然后开始配对，它会显示一个二维码：",
+  "phoneLinkPairStep3": "用这台手机的相机扫描二维码，或者粘贴它打印出的链接：",
+  "phoneLinkPairPaste": "粘贴链接",
+  "phoneLinkPairInvalid": "这不是 dsh-go-link 的配对链接",
+  "phoneLinkPairConfirmTitle": "与「{name}」配对？",
+  "@phoneLinkPairConfirmTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkPairConfirmBody": "它上面的智能体将可以使用这台手机，确认方式和限制与 DSH 相同。屏幕文字会发到那台电脑，以及它的智能体所用的模型。它的密钥：{fingerprint}",
+  "@phoneLinkPairConfirmBody": {
+    "placeholders": {
+      "fingerprint": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkPairAction": "配对",
+  "phoneLinkPaired": "已与 {name} 配对",
+  "@phoneLinkPaired": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkPairNeedsPhoneControl": "请先打开手机操控，再打开这个链接",
+  "phoneLinkForget": "忘记这台电脑",
+  "phoneLinkKey": "密钥 {fingerprint}",
+  "@phoneLinkKey": {
+    "placeholders": {
+      "fingerprint": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkAgents": "智能体对话",
+  "phoneLinkAgentsHint": "在那台电脑上启动 Claude Code、Codex 或 OpenCode，在这里跟进"
+}

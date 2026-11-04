@@ -1,0 +1,15 @@
+name: dsh_link
+description: >-
+  Pure-Dart phone end of dsh-go-link (host/dsh-go-link): the link the phone
+  dials to a computer so agents there (Claude Code, Codex, OpenCode,
+  Antigravity, ...) can use the phone's MCP tools. Hello, frames, keepalive,
+  and a router that hands each agent's MCP channel to the phone.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.11.0
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.26.0

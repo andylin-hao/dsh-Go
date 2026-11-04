@@ -9957,6 +9957,183 @@ class L10nZh extends L10n {
   String get phoneKeepFailed => '没连上；下次打开 App 或开始操控时再试';
 
   @override
+  String get phoneLinkTitle => '电脑';
+
+  @override
+  String get phoneLinkHint => '让 SSH 主机上的智能体使用这台手机，比如 Claude Code、Codex、OpenCode、Antigravity。';
+
+  @override
+  String get phoneLinkNoHosts => '还没有 SSH 主机';
+
+  @override
+  String get phoneLinkNoHostsHint => '先在主机切换里添加一台，再回这里打开。';
+
+  @override
+  String get phoneLinkOff => '未开启';
+
+  @override
+  String get phoneLinkConnecting => '连接中…';
+
+  @override
+  String get phoneLinkAttached => '已连接 · 还没有智能体';
+
+  @override
+  String phoneLinkAttachedAgents(String agents) {
+    return '已连接 · $agents';
+  }
+
+  @override
+  String phoneLinkWaiting(String reason) {
+    return '重新连接中 · $reason';
+  }
+
+  @override
+  String get phoneLinkErrHostKeyUnknown => '先在 DSH Go 里连接一次这台主机，确认它的密钥';
+
+  @override
+  String get phoneLinkErrHostKeyChanged => '主机密钥变了，请到主机页面核对';
+
+  @override
+  String get phoneLinkErrNoShell => '主机上没有 POSIX shell';
+
+  @override
+  String get phoneLinkErrNodeMissing => '电脑上没有安装 Node.js';
+
+  @override
+  String phoneLinkErrNodeOld(String version) {
+    return 'Node.js $version 太旧，需要 18 或更新的版本';
+  }
+
+  @override
+  String get phoneLinkErrInstall => '没能在电脑上安装 dsh-go-link';
+
+  @override
+  String get phoneLinkErrStart => 'dsh-go-link 没能在电脑上启动';
+
+  @override
+  String get phoneLinkErrRefused => 'dsh-go-link 拒绝了连接';
+
+  @override
+  String get phoneLinkErrReplaced => '另一台手机连上了这台电脑';
+
+  @override
+  String get phoneLinkErrLost => '连接断开了';
+
+  @override
+  String get phoneLinkErrSsh => '连不上主机';
+
+  @override
+  String phoneLinkWorking(String agent) {
+    return '$agent 正在操作手机';
+  }
+
+  @override
+  String get phoneLinkSetup => '设置智能体';
+
+  @override
+  String phoneLinkSetupTitle(String host) {
+    return '「$host」上的手机工具';
+  }
+
+  @override
+  String get phoneLinkSetupBody => '给每个智能体登记一次手机工具。它们以「phone」出现，这个开关开着时可用。';
+
+  @override
+  String get phoneLinkSetupRun => '在终端运行';
+
+  @override
+  String phoneLinkSetupAddTo(String file) {
+    return '加到 $file';
+  }
+
+  @override
+  String get phoneLinkSetupLoading => '正在从电脑读取路径…';
+
+  @override
+  String phoneLinkSetupFailed(String reason) {
+    return '读取失败：$reason';
+  }
+
+  @override
+  String get phoneLinkSetupNote => '确认方式、应用名单和已解除的限制与 DSH 一样生效。智能体按它自报的名字显示，确认前请留意是哪台电脑。';
+
+  @override
+  String phoneLinkRiskTitle(String host) {
+    return '允许「$host」上的智能体使用这台手机？';
+  }
+
+  @override
+  String get phoneLinkRiskBody => '它们能读屏、点按和输入，确认方式和限制与 DSH 相同。屏幕文字会发到那台电脑，以及它的智能体所用的模型。';
+
+  @override
+  String get phoneLinkRiskAction => '允许';
+
+  @override
+  String get phoneLinkErrUnreachable => '在这个网络上连不到这台电脑';
+
+  @override
+  String get phoneLinkErrNotPaired => '这台电脑不再接受这台手机，请重新配对';
+
+  @override
+  String get phoneLinkPair => '配对局域网里的电脑';
+
+  @override
+  String get phoneLinkPairHint => '适合没开 SSH 的 Mac 或 PC，电脑上需要 Node.js 18 或更新版本';
+
+  @override
+  String get phoneLinkPairTitle => '配对电脑';
+
+  @override
+  String get phoneLinkPairStep1 => '在电脑上下载 dsh-go-link：';
+
+  @override
+  String get phoneLinkPairStep2 => '然后开始配对，它会显示一个二维码：';
+
+  @override
+  String get phoneLinkPairStep3 => '用这台手机的相机扫描二维码，或者粘贴它打印出的链接：';
+
+  @override
+  String get phoneLinkPairPaste => '粘贴链接';
+
+  @override
+  String get phoneLinkPairInvalid => '这不是 dsh-go-link 的配对链接';
+
+  @override
+  String phoneLinkPairConfirmTitle(String name) {
+    return '与「$name」配对？';
+  }
+
+  @override
+  String phoneLinkPairConfirmBody(String fingerprint) {
+    return '它上面的智能体将可以使用这台手机，确认方式和限制与 DSH 相同。屏幕文字会发到那台电脑，以及它的智能体所用的模型。它的密钥：$fingerprint';
+  }
+
+  @override
+  String get phoneLinkPairAction => '配对';
+
+  @override
+  String phoneLinkPaired(String name) {
+    return '已与 $name 配对';
+  }
+
+  @override
+  String get phoneLinkPairNeedsPhoneControl => '请先打开手机操控，再打开这个链接';
+
+  @override
+  String get phoneLinkForget => '忘记这台电脑';
+
+  @override
+  String phoneLinkKey(String fingerprint) {
+    return '密钥 $fingerprint';
+  }
+
+  @override
+  String get phoneLinkAgents => '智能体对话';
+
+  @override
+  String get phoneLinkAgentsHint => '在那台电脑上启动 Claude Code、Codex 或 OpenCode，在这里跟进';
+
+  @override
   String get phoneModeTitle => '选择确认方式';
 
   @override
@@ -12175,6 +12352,9 @@ class L10nZh extends L10n {
   String get remoteErrDshMissing => '主机上没有 dsh，装好后重试，或在启动命令里填完整路径';
 
   @override
+  String get remoteErrDshMissingPhoneLink => '只想让这台电脑上的智能体使用手机？不需要 DSH：保存主机，再到 设置 › 手机操控 › 电脑 里打开它';
+
+  @override
   String get remoteStartCommandExample => '启动命令示例：~/.nvm/versions/node/v22.0.0/bin/dsh web';
 
   @override
@@ -13482,6 +13662,248 @@ class L10nZh extends L10n {
   String get remoteNetworkObservedAt => '最近观测';
 
   @override
+  String get agentsTitle => '电脑上的智能体';
+
+  @override
+  String get agentsSubtitle => '在你电脑上运行的 Claude Code、Codex、Antigravity 和 OpenCode';
+
+  @override
+  String get agentsEmpty => '还没有连上能运行智能体的电脑';
+
+  @override
+  String get agentsEmptyHint => '在 设置 › 手机操控 › 电脑 里打开一台，它会运行装在那里的智能体';
+
+  @override
+  String get agentsNew => '新对话';
+
+  @override
+  String get agentsNoSessions => '还没有对话';
+
+  @override
+  String get agentsNoneInstalled => '这台电脑上没有装支持的智能体：Claude Code、Codex、Antigravity、OpenCode 或 Gemini CLI';
+
+  @override
+  String get agentsStatusRunning => '工作中';
+
+  @override
+  String get agentsStatusIdle => '空闲';
+
+  @override
+  String get agentsStatusStarting => '启动中…';
+
+  @override
+  String get agentsStatusStopped => '已暂停 · 发消息时继续';
+
+  @override
+  String get agentsWaitingForYou => '等你确认';
+
+  @override
+  String agentsNewTitle(String computer) {
+    return '在「$computer」上新建对话';
+  }
+
+  @override
+  String get agentsPickAgent => '智能体';
+
+  @override
+  String get agentsPickFolder => '文件夹';
+
+  @override
+  String get agentsStartHere => '在这里开始';
+
+  @override
+  String get agentsUp => '上一级文件夹';
+
+  @override
+  String agentsComposerHint(String agent) {
+    return '给 $agent 发消息';
+  }
+
+  @override
+  String get agentsEndSession => '结束对话';
+
+  @override
+  String get agentsMode => '模式';
+
+  @override
+  String get agentsThinking => '思考';
+
+  @override
+  String agentsPermissionTitle(String tool) {
+    return '允许「$tool」？';
+  }
+
+  @override
+  String agentsPermissionChosen(String option) {
+    return '已选择：$option';
+  }
+
+  @override
+  String get agentsPermissionCancelled => '已不再等待';
+
+  @override
+  String get agentsPlan => '计划';
+
+  @override
+  String get agentsStopped => '已停止';
+
+  @override
+  String get agentsStoppedLength => '已停止：回复达到长度上限';
+
+  @override
+  String get agentsStoppedRefusal => '智能体拒绝继续';
+
+  @override
+  String agentsStoppedOther(String reason) {
+    return '已停止（$reason）';
+  }
+
+  @override
+  String agentsErrAuth(String agent) {
+    return '$agent 需要在电脑上登录：在那台电脑的终端里运行一次并登录';
+  }
+
+  @override
+  String get agentsErrUnavailable => '这台电脑上没有装这个智能体';
+
+  @override
+  String get agentsErrExited => '智能体意外退出了';
+
+  @override
+  String agentsErrOther(String message) {
+    return '出错了：$message';
+  }
+
+  @override
+  String get agentsContextLost => '智能体重新启动了，之前的上下文没有保留';
+
+  @override
+  String get agentsOffline => '电脑没有连上，连上后才能发消息';
+
+  @override
+  String get agentsBusy => '智能体还在工作';
+
+  @override
+  String agentsSendFailed(String code) {
+    return '没能发送（$code）';
+  }
+
+  @override
+  String get agentsEnv => '环境变量';
+
+  @override
+  String get agentsEnvNone => '未设置';
+
+  @override
+  String agentsEnvCount(int count) {
+    return '$count 个';
+  }
+
+  @override
+  String agentsEnvTitle(String agent) {
+    return '$agent 的环境变量';
+  }
+
+  @override
+  String get agentsEnvHint => '智能体下次启动时生效。只加密存在这台手机上、只发给这台电脑；电脑只放在内存里，不写入磁盘';
+
+  @override
+  String get agentsEnvName => '变量名';
+
+  @override
+  String get agentsEnvValue => '值';
+
+  @override
+  String get agentsEnvBadName => '变量名只能用字母、数字和下划线，不能以数字开头';
+
+  @override
+  String agentsEnvRemove(String name) {
+    return '删除 $name';
+  }
+
+  @override
+  String get agentsEnvShow => '显示值';
+
+  @override
+  String get agentsEnvHide => '隐藏值';
+
+  @override
+  String get agentsEnvSaveFailed => '没能保存环境变量';
+
+  @override
+  String get agentsBypass => '跳过权限确认';
+
+  @override
+  String get agentsBypassHintMode => '智能体不再先问你；随时可以关掉';
+
+  @override
+  String get agentsBypassHintRestart => '智能体不再先问你；切换时它会重启（只在两轮之间）';
+
+  @override
+  String get agentsBypassTag => '跳过确认';
+
+  @override
+  String agentsBypassRiskTitle(String agent) {
+    return '让 $agent 不经确认就运行命令、修改文件？';
+  }
+
+  @override
+  String get agentsBypassRiskBody => '它在电脑上的每一步都不再先问你，包括删除文件、联网和安装软件。操控手机仍按这台手机的确认方式。';
+
+  @override
+  String get agentsBypassRiskAction => '跳过确认';
+
+  @override
+  String get agentsErrBypass => '这个智能体不能跳过确认';
+
+  @override
+  String get agentsEarlier => '这个文件夹里的对话';
+
+  @override
+  String agentsEarlierEmpty(String agent) {
+    return '这里还没有 $agent 的对话';
+  }
+
+  @override
+  String agentsEarlierUnlisted(String agent) {
+    return '$agent 不提供之前对话的列表，只显示从这台手机开始的';
+  }
+
+  @override
+  String agentsEarlierFailed(String agent, String code) {
+    return '读不到 $agent 之前的对话（$code）';
+  }
+
+  @override
+  String agentsEarlierOnComputer(String when) {
+    return '在电脑上 · $when';
+  }
+
+  @override
+  String agentsEarlierNoLoad(String agent) {
+    return '$agent 不能重新打开之前的对话';
+  }
+
+  @override
+  String get agentsResumed => '接着之前的对话继续；上面是智能体保存的记录';
+
+  @override
+  String get agentsErrResume => '这个智能体不能重新打开之前的对话';
+
+  @override
+  String agentsErrMode(String mode) {
+    return '智能体没有切换模式：$mode';
+  }
+
+  @override
+  String get agentsSubfolders => '里面的文件夹';
+
+  @override
+  String agentsBypassOnNote(String agent) {
+    return '已跳过权限确认：$agent 不会先问你就运行命令、修改文件';
+  }
+
+  @override
   String get stateWorkspaceFilesHint => '已上传到当前工作区的文件：';
 
   @override
@@ -13821,6 +14243,9 @@ class L10nZh extends L10n {
 
   @override
   String get searchKwPhoneReturn => '返回,完成后返回';
+
+  @override
+  String get searchKwPhoneComputers => '电脑,智能体,Claude Code,Codex,OpenCode,Antigravity,SSH,MCP,远程操控';
 
   @override
   String get searchKwPhoneBackgroundGuide => '后台确认,返回 App';

@@ -6056,6 +6056,141 @@
   "phoneKeepWaitingNetwork": "等连上 Wi‑Fi 后再连",
   "phoneKeepNotPaired": "还没有配对，请先完成无线调试配对",
   "phoneKeepFailed": "没连上；下次打开 App 或开始操控时再试",
+  "phoneLinkTitle": "电脑",
+  "phoneLinkHint": "让 SSH 主机上的智能体使用这台手机，比如 Claude Code、Codex、OpenCode、Antigravity。",
+  "phoneLinkNoHosts": "还没有 SSH 主机",
+  "phoneLinkNoHostsHint": "先在主机切换里添加一台，再回这里打开。",
+  "phoneLinkOff": "未开启",
+  "phoneLinkConnecting": "连接中…",
+  "phoneLinkAttached": "已连接 · 还没有智能体",
+  "phoneLinkAttachedAgents": "已连接 · {agents}",
+  "@phoneLinkAttachedAgents": {
+    "placeholders": {
+      "agents": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkWaiting": "重新连接中 · {reason}",
+  "@phoneLinkWaiting": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkErrHostKeyUnknown": "先在 DSH Go 里连接一次这台主机，确认它的密钥",
+  "phoneLinkErrHostKeyChanged": "主机密钥变了，请到主机页面核对",
+  "phoneLinkErrNoShell": "主机上没有 POSIX shell",
+  "phoneLinkErrNodeMissing": "电脑上没有安装 Node.js",
+  "phoneLinkErrNodeOld": "Node.js {version} 太旧，需要 18 或更新的版本",
+  "@phoneLinkErrNodeOld": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkErrInstall": "没能在电脑上安装 dsh-go-link",
+  "phoneLinkErrStart": "dsh-go-link 没能在电脑上启动",
+  "phoneLinkErrRefused": "dsh-go-link 拒绝了连接",
+  "phoneLinkErrReplaced": "另一台手机连上了这台电脑",
+  "phoneLinkErrLost": "连接断开了",
+  "phoneLinkErrSsh": "连不上主机",
+  "phoneLinkWorking": "{agent} 正在操作手机",
+  "@phoneLinkWorking": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkSetup": "设置智能体",
+  "phoneLinkSetupTitle": "「{host}」上的手机工具",
+  "@phoneLinkSetupTitle": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkSetupBody": "给每个智能体登记一次手机工具。它们以「phone」出现，这个开关开着时可用。",
+  "phoneLinkSetupRun": "在终端运行",
+  "phoneLinkSetupAddTo": "加到 {file}",
+  "@phoneLinkSetupAddTo": {
+    "placeholders": {
+      "file": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkSetupLoading": "正在从电脑读取路径…",
+  "phoneLinkSetupFailed": "读取失败：{reason}",
+  "@phoneLinkSetupFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkSetupNote": "确认方式、应用名单和已解除的限制与 DSH 一样生效。智能体按它自报的名字显示，确认前请留意是哪台电脑。",
+  "phoneLinkRiskTitle": "允许「{host}」上的智能体使用这台手机？",
+  "@phoneLinkRiskTitle": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkRiskBody": "它们能读屏、点按和输入，确认方式和限制与 DSH 相同。屏幕文字会发到那台电脑，以及它的智能体所用的模型。",
+  "phoneLinkRiskAction": "允许",
+  "phoneLinkErrUnreachable": "在这个网络上连不到这台电脑",
+  "phoneLinkErrNotPaired": "这台电脑不再接受这台手机，请重新配对",
+  "phoneLinkPair": "配对局域网里的电脑",
+  "phoneLinkPairHint": "适合没开 SSH 的 Mac 或 PC，电脑上需要 Node.js 18 或更新版本",
+  "phoneLinkPairTitle": "配对电脑",
+  "phoneLinkPairStep1": "在电脑上下载 dsh-go-link：",
+  "phoneLinkPairStep2": "然后开始配对，它会显示一个二维码：",
+  "phoneLinkPairStep3": "用这台手机的相机扫描二维码，或者粘贴它打印出的链接：",
+  "phoneLinkPairPaste": "粘贴链接",
+  "phoneLinkPairInvalid": "这不是 dsh-go-link 的配对链接",
+  "phoneLinkPairConfirmTitle": "与「{name}」配对？",
+  "@phoneLinkPairConfirmTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkPairConfirmBody": "它上面的智能体将可以使用这台手机，确认方式和限制与 DSH 相同。屏幕文字会发到那台电脑，以及它的智能体所用的模型。它的密钥：{fingerprint}",
+  "@phoneLinkPairConfirmBody": {
+    "placeholders": {
+      "fingerprint": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkPairAction": "配对",
+  "phoneLinkPaired": "已与 {name} 配对",
+  "@phoneLinkPaired": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkPairNeedsPhoneControl": "请先打开手机操控，再打开这个链接",
+  "phoneLinkForget": "忘记这台电脑",
+  "phoneLinkKey": "密钥 {fingerprint}",
+  "@phoneLinkKey": {
+    "placeholders": {
+      "fingerprint": {
+        "type": "String"
+      }
+    }
+  },
+  "phoneLinkAgents": "智能体对话",
+  "phoneLinkAgentsHint": "在那台电脑上启动 Claude Code、Codex 或 OpenCode，在这里跟进",
   "phoneModeTitle": "选择确认方式",
   "phoneModeMessage": "随时可在设置里更改",
   "phoneModeAsk": "关键步骤先问我",
@@ -7596,6 +7731,7 @@
     }
   },
   "remoteErrDshMissing": "主机上没有 dsh，装好后重试，或在启动命令里填完整路径",
+  "remoteErrDshMissingPhoneLink": "只想让这台电脑上的智能体使用手机？不需要 DSH：保存主机，再到 设置 › 手机操控 › 电脑 里打开它",
   "remoteStartCommandExample": "启动命令示例：~/.nvm/versions/node/v22.0.0/bin/dsh web",
   "remoteErrDshStartTimeout": "远端 DSH 启动超时",
   "remoteErrDshExited": "远端 DSH 启动后立即退出",
@@ -8564,6 +8700,210 @@
   "remoteNetworkFallbackPathUnverified": "尚未确认 WebRTC 路径类型",
   "remoteNetworkSnapshotHint": "显示最近一次确认的路径与延迟，刷新可重新检测。",
   "remoteNetworkObservedAt": "最近观测",
+  "agentsTitle": "电脑上的智能体",
+  "agentsSubtitle": "在你电脑上运行的 Claude Code、Codex、Antigravity 和 OpenCode",
+  "agentsEmpty": "还没有连上能运行智能体的电脑",
+  "agentsEmptyHint": "在 设置 › 手机操控 › 电脑 里打开一台，它会运行装在那里的智能体",
+  "agentsNew": "新对话",
+  "agentsNoSessions": "还没有对话",
+  "agentsNoneInstalled": "这台电脑上没有装支持的智能体：Claude Code、Codex、Antigravity、OpenCode 或 Gemini CLI",
+  "agentsStatusRunning": "工作中",
+  "agentsStatusIdle": "空闲",
+  "agentsStatusStarting": "启动中…",
+  "agentsStatusStopped": "已暂停 · 发消息时继续",
+  "agentsWaitingForYou": "等你确认",
+  "agentsNewTitle": "在「{computer}」上新建对话",
+  "@agentsNewTitle": {
+    "placeholders": {
+      "computer": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsPickAgent": "智能体",
+  "agentsPickFolder": "文件夹",
+  "agentsStartHere": "在这里开始",
+  "agentsUp": "上一级文件夹",
+  "agentsComposerHint": "给 {agent} 发消息",
+  "@agentsComposerHint": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsEndSession": "结束对话",
+  "agentsMode": "模式",
+  "agentsThinking": "思考",
+  "agentsPermissionTitle": "允许「{tool}」？",
+  "@agentsPermissionTitle": {
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsPermissionChosen": "已选择：{option}",
+  "@agentsPermissionChosen": {
+    "placeholders": {
+      "option": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsPermissionCancelled": "已不再等待",
+  "agentsPlan": "计划",
+  "agentsStopped": "已停止",
+  "agentsStoppedLength": "已停止：回复达到长度上限",
+  "agentsStoppedRefusal": "智能体拒绝继续",
+  "agentsStoppedOther": "已停止（{reason}）",
+  "@agentsStoppedOther": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsErrAuth": "{agent} 需要在电脑上登录：在那台电脑的终端里运行一次并登录",
+  "@agentsErrAuth": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsErrUnavailable": "这台电脑上没有装这个智能体",
+  "agentsErrExited": "智能体意外退出了",
+  "agentsErrOther": "出错了：{message}",
+  "@agentsErrOther": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsContextLost": "智能体重新启动了，之前的上下文没有保留",
+  "agentsOffline": "电脑没有连上，连上后才能发消息",
+  "agentsBusy": "智能体还在工作",
+  "agentsSendFailed": "没能发送（{code}）",
+  "@agentsSendFailed": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsEnv": "环境变量",
+  "agentsEnvNone": "未设置",
+  "agentsEnvCount": "{count} 个",
+  "@agentsEnvCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "agentsEnvTitle": "{agent} 的环境变量",
+  "@agentsEnvTitle": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsEnvHint": "智能体下次启动时生效。只加密存在这台手机上、只发给这台电脑；电脑只放在内存里，不写入磁盘",
+  "agentsEnvName": "变量名",
+  "agentsEnvValue": "值",
+  "agentsEnvBadName": "变量名只能用字母、数字和下划线，不能以数字开头",
+  "agentsEnvRemove": "删除 {name}",
+  "@agentsEnvRemove": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsEnvShow": "显示值",
+  "agentsEnvHide": "隐藏值",
+  "agentsEnvSaveFailed": "没能保存环境变量",
+  "agentsBypass": "跳过权限确认",
+  "agentsBypassHintMode": "智能体不再先问你；随时可以关掉",
+  "agentsBypassHintRestart": "智能体不再先问你；切换时它会重启（只在两轮之间）",
+  "agentsBypassTag": "跳过确认",
+  "agentsBypassRiskTitle": "让 {agent} 不经确认就运行命令、修改文件？",
+  "@agentsBypassRiskTitle": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsBypassRiskBody": "它在电脑上的每一步都不再先问你，包括删除文件、联网和安装软件。操控手机仍按这台手机的确认方式。",
+  "agentsBypassRiskAction": "跳过确认",
+  "agentsErrBypass": "这个智能体不能跳过确认",
+  "agentsEarlier": "这个文件夹里的对话",
+  "agentsEarlierEmpty": "这里还没有 {agent} 的对话",
+  "@agentsEarlierEmpty": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsEarlierUnlisted": "{agent} 不提供之前对话的列表，只显示从这台手机开始的",
+  "@agentsEarlierUnlisted": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsEarlierFailed": "读不到 {agent} 之前的对话（{code}）",
+  "@agentsEarlierFailed": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsEarlierOnComputer": "在电脑上 · {when}",
+  "@agentsEarlierOnComputer": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsEarlierNoLoad": "{agent} 不能重新打开之前的对话",
+  "@agentsEarlierNoLoad": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsResumed": "接着之前的对话继续；上面是智能体保存的记录",
+  "agentsErrResume": "这个智能体不能重新打开之前的对话",
+  "agentsErrMode": "智能体没有切换模式：{mode}",
+  "@agentsErrMode": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsSubfolders": "里面的文件夹",
+  "agentsBypassOnNote": "已跳过权限确认：{agent} 不会先问你就运行命令、修改文件",
+  "@agentsBypassOnNote": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "stateWorkspaceFilesHint": "已上传到当前工作区的文件：",
   "stateRemoteUploadNameInvalid": "文件名不受主机支持，请去掉特殊字符或缩短后再试",
   "stateRemoteUploadWorkspaceUnavailable": "当前对话没有可写的工作目录",
@@ -8703,6 +9043,7 @@
   "searchKwPhoneConfirm": "别问我,免确认,每次都询问,始终免确认,确认",
   "searchKwPhoneAutoCollapse": "悬浮条,收起,悬浮球",
   "searchKwPhoneReturn": "返回,完成后返回",
+  "searchKwPhoneComputers": "电脑,智能体,Claude Code,Codex,OpenCode,Antigravity,SSH,MCP,远程操控",
   "searchKwPhoneBackgroundGuide": "后台确认,返回 App",
   "searchKwAutoStart": "自动启动,开机启动,自启",
   "searchKwAutoSafe": "安全模式,自动安全模式",

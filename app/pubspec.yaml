@@ -57,6 +57,9 @@ dependencies:
     path: ../packages/dsh_client
   dsh_remote:
     path: ../packages/dsh_remote
+  # The phone end of dsh-go-link: agents on SSH hosts use phone control (docs/design/remote-agents.md).
+  dsh_link:
+    path: ../packages/dsh_link
   scrollable_positioned_list: ^0.3.8
   share_plus: ^13.3.1
   dartssh2: ^4.1.0
@@ -134,6 +137,9 @@ flutter:
     # Engine-side auth bridge (ChatGPT / Claude sign-in), copied into the guest at
     # every engine start by runtime/AppAuthGuest.kt; tests in tool/engine_auth/.
     - assets/engine/auth/
+    # dsh-go-link, installed on SSH hosts so their agents can use phone control
+    # (lib/remote/link/). Copied from host/dsh-go-link by its scripts/sync-asset.mjs.
+    - assets/link/
     # 社区 hub content shipped with the app (lib/state/community_state.dart),
     # shown until a newer community.json is fetched.
     - assets/community/

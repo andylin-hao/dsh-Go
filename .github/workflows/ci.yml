@@ -44,7 +44,7 @@ jobs:
           filters: |
             ci: &ci .github/workflows/ci.yml
             app: [*ci, 'app/**', 'packages/**', 'sdk/plugin-kit/**', 'site/share/**', 'docs/guide/**', 'THIRD_PARTY_NOTICES.md']
-            packages: [*ci, 'packages/**']
+            packages: [*ci, 'packages/**', 'host/**']
             runtime: [*ci, 'runtime/**', 'examples/**', 'sdk/plugin-kit/**', 'app/tool/engine_auth/**', 'app/test/plugin_config/fixtures/**', 'app/test/media/fixtures/**']
 
   checks:
@@ -66,6 +66,7 @@ jobs:
           python3 app/tool/l10n_merge.py --check
           python3 app/tool/guide_sync.py --check
           node sdk/plugin-kit/scripts/sync-skill.mjs --check
+          node host/dsh-go-link/scripts/sync-asset.mjs --check
           # Not --check: this also writes site/build/share, which the share worker builds from.
           python3 app/tool/make_replay_viewer.py
           git diff --exit-code -- app/lib/share_code/replay_viewer.g.dart
@@ -76,6 +77,8 @@ jobs:
           for dir in tooling runtime/tests app/tool; do
             "$RUNNER_TEMP/venv/bin/python" -m unittest discover -s "$dir" -p 'test_*.py'
           done
+      - name: dsh-go-link (agents on computers using the phone)
+        run: node --test host/dsh-go-link/test/*.test.mjs
       - name: Plugin SDK
         working-directory: sdk/plugin-kit
         run: |
@@ -150,8 +153,10 @@ jobs:
     steps:
       - *checkout
       - *flutter
+      # packages/dsh_link's end-to-end test runs the real dsh-go-link daemon.
+      - *node
       - run: |
-          for pkg in packages/dsh_client packages/dsh_remote; do
+          for pkg in packages/dsh_client packages/dsh_remote packages/dsh_link; do
             (cd "$pkg" && dart pub get --enforce-lockfile && dart analyze && dart test)
           done
 

@@ -48,6 +48,8 @@ class PhonePlugin : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHandle
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         attached = false
+        // The links to computers live in Dart: with the engine gone, nobody relays their answers.
+        control.remote.closeAll()
         control.background.cancelUnwantedPending()
         control.prompts.detachOwner(promptOwner)
         activity?.removeOnNewIntentListener(this)
@@ -187,6 +189,31 @@ class PhonePlugin : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHandle
             "cancelPrompt" -> {
                 val id = call.argument<String>("requestId")
                 result.success(id != null && id.length in 1..200 && control.prompts.cancel(id))
+            }
+            // Agents on computers through dsh-go-link (docs/design/remote-agents.md); Dart owns the link.
+            "remoteCatalog" -> result.success(RemotePhoneSessions.catalog(PhoneControl.SERVER_VERSION))
+            "remoteOpen" -> {
+                val ch = call.argument<String>("ch")
+                val key = call.argument<String>("key")
+                if (ch.isNullOrEmpty() || key.isNullOrEmpty()) result.success(false)
+                else {
+                    control.remote.open(ch, PhoneOrigin.of(key, call.argument<String>("client"), call.argument<String>("host")))
+                    result.success(true)
+                }
+            }
+            "remoteLine" -> {
+                val ch = call.argument<String>("ch")
+                val line = call.argument<String>("line")
+                if (ch == null || line == null) result.success(null)
+                else control.remote.line(ch, line) { reply -> main.post { if (attached) result.success(reply) } }
+            }
+            // Computers may use the phone: keep the process (and Dart's links) alive in the background.
+            "linkService" -> result.success(PhoneLinkService.ensure(appContext, call.argument<Boolean>("on") == true))
+            // An agent session's turn ended on the computer: its phone task ends with it.
+            "remoteFinish" -> result.success(call.argument<String>("key")?.let { control.tasks.finishOwnedBy(it) } == true)
+            "remoteClose" -> {
+                call.argument<String>("ch")?.let { control.remote.close(it) } ?: control.remote.closeAll()
+                result.success(true)
             }
             // 设置 → 手机操控 → 悬浮条: {idleOpacity 0.3–1, autoCollapse}; a showing overlay follows at once.
             "overlayPrefs" -> result.success(OverlayPrefs.read(appContext).toMap())

@@ -32,6 +32,7 @@ import 'app_rules_page.dart';
 import 'dnd_mode_page.dart';
 import 'phone_disclosure_sheet.dart';
 import 'phone_background_guide.dart';
+import 'phone_computers.dart';
 import 'phone_unlock_page.dart';
 import 'phone_widgets.dart';
 import 'restricted_settings_guide.dart';
@@ -310,7 +311,11 @@ class _PhoneControlScreenState extends ConsumerState<PhoneControlScreen> {
               ListPageRow(
                 icon: task.paused ? AppIcons.paused : AppIcons.phoneControl,
                 iconColor: Theme.of(context).colorScheme.primary,
-                title: task.app == null ? l10n.phoneControlWorking : l10n.phoneControlWorkingApp(task.app!),
+                title: task.origin != null
+                    ? l10n.phoneLinkWorking(task.origin!.label)
+                    : task.app == null
+                    ? l10n.phoneControlWorking
+                    : l10n.phoneControlWorkingApp(task.app!),
                 subtitle: task.paused
                     ? l10n.commonPaused
                     : task.waived
@@ -329,6 +334,8 @@ class _PhoneControlScreenState extends ConsumerState<PhoneControlScreen> {
           gap,
           ..._rules(state),
           if (status.enabled) ...[
+            gap,
+            const PhoneComputersCard(),
             gap,
             ListPageCard(
               title: l10n.phoneControlAdvanced,

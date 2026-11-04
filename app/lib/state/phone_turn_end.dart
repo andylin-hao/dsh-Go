@@ -91,6 +91,12 @@ class PhoneTurnLink {
   /// A status push. True when a new task began: report the conversations
   /// running now with [began].
   bool onStatus(PhoneTaskStatus task) {
+    // A computer's agent drives it: no local turn is its turn.
+    if (task.origin != null) {
+      if (task.id != null && task.id != _taskId) _taskId = task.id;
+      invalidate();
+      return false;
+    }
     if (task.active) {
       if (task.id == null) return false;
       final fresh = task.id != _taskId;

@@ -76,6 +76,8 @@ class ActionLogRow extends StatelessWidget {
     final tool = phoneToolLabel(entry.tool);
     final title = entry.summary.isEmpty ? tool : entry.summary;
     final meta = [
+      // An agent on a computer made this call (this phone's engine goes unnamed).
+      ?entry.origin,
       ?entry.app,
       if (entry.summary.isNotEmpty) tool,
       formatLogTime(entry.time),

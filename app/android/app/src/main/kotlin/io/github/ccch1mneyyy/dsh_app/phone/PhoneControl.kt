@@ -125,7 +125,10 @@ class PhoneControl private constructor(private val app: Context) : PhoneEnv, Con
     val core = PhoneCore(this, tasks, log)
     val notificationGate = NotificationGate(app) { setStatusLine(it) }
     val prompts = PhonePrompts(app, tasks, ::isEnabled, ::isLocked, notificationGate, ::reopen)
-    private val server = McpServer(PhoneToolCatalog.listJson(), core::call, SERVER_VERSION)
+    private val server = McpServer(PhoneToolCatalog.listJson(), { name, args -> core.call(name, args) }, SERVER_VERSION)
+
+    /** Agents on computers, through dsh-go-link (Dart relays the link): same core, the agent as owner. */
+    val remote = RemotePhoneSessions({ name, args, origin -> core.call(name, args, origin) }, SERVER_VERSION) { tasks.endIfOwner(it) }
     private val bridge = PhoneBridge(server) { line -> logger(line) }
 
     @Volatile private var logger: (String) -> Unit = {}
@@ -162,6 +165,7 @@ class PhoneControl private constructor(private val app: Context) : PhoneEnv, Con
             // l10n:keep agent stop reason
             tasks.stop("手机操控已关闭")
             stopBridge()
+            remote.closeAll()
         } else {
             tasks.clearStop()
             ticker.execute(::keep)
@@ -292,8 +296,9 @@ class PhoneControl private constructor(private val app: Context) : PhoneEnv, Con
 
     // ── Task ────────────────────────────────────────────────────────────────────────
 
+    /** 停止 in the app or the notification: the person asked. */
     fun stopTask(reason: String): Boolean {
-        tasks.stop(reason)
+        tasks.stop(reason, byPerson = true)
         return true
     }
 
@@ -363,7 +368,7 @@ class PhoneControl private constructor(private val app: Context) : PhoneEnv, Con
     fun liveTask(): LiveTask? {
         val s = tasks.snapshot()
         if (!s.active) return null
-        return LiveTask(s.id, statusLine, s.app, s.paused)
+        return LiveTask(s.id, statusLine, whoAndWhere(s), s.paused)
     }
 
     data class LiveTask(val id: Long, val line: String?, val app: String?, val paused: Boolean)
@@ -372,8 +377,12 @@ class PhoneControl private constructor(private val app: Context) : PhoneEnv, Con
     fun foregroundLine(): String? {
         val s = tasks.snapshot()
         if (!s.active) return null
-        return statusLine ?: AppStrings.get(app, R.string.phone_running) + (s.app?.let { " · $it" } ?: "")
+        return statusLine ?: AppStrings.get(app, R.string.phone_running) + (whoAndWhere(s)?.let { " · $it" } ?: "")
     }
+
+    /** "Claude Code · dev-box · WeChat" for an agent on a computer; just the app for this phone's engine. */
+    private fun whoAndWhere(s: PhoneTasks.Snapshot): String? =
+        listOfNotNull(s.origin?.label, s.app).joinToString(" · ").ifEmpty { null }
 
     private fun registerScreenOff() {
         if (screenReceiver != null) return
@@ -546,9 +555,9 @@ class PhoneControl private constructor(private val app: Context) : PhoneEnv, Con
 
     override fun onPauseChanged(paused: Boolean) = tasks.setPaused(paused)
 
-    override fun onStopRequested(reason: String) {
+    override fun onStopRequested(reason: String, byPerson: Boolean) {
         // The service also reports screen off / service gone while idle: only a running task stops.
-        if (tasks.snapshot().active) tasks.stop(reason) else tasks.invalidateOwners()
+        if (tasks.snapshot().active) tasks.stop(reason, byPerson) else tasks.invalidateOwners()
     }
 
     override fun onInterject(text: String) = tasks.interject(text)

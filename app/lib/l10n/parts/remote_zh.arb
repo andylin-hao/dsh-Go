@@ -67,6 +67,7 @@
     }
   },
   "remoteErrDshMissing": "主机上没有 dsh，装好后重试，或在启动命令里填完整路径",
+  "remoteErrDshMissingPhoneLink": "只想让这台电脑上的智能体使用手机？不需要 DSH：保存主机，再到 设置 › 手机操控 › 电脑 里打开它",
   "remoteStartCommandExample": "启动命令示例：~/.nvm/versions/node/v22.0.0/bin/dsh web",
   "remoteErrDshStartTimeout": "远端 DSH 启动超时",
   "remoteErrDshExited": "远端 DSH 启动后立即退出",

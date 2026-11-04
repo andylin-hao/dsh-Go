@@ -1,0 +1,206 @@
+{
+  "agentsTitle": "电脑上的智能体",
+  "agentsSubtitle": "在你电脑上运行的 Claude Code、Codex、Antigravity 和 OpenCode",
+  "agentsEmpty": "还没有连上能运行智能体的电脑",
+  "agentsEmptyHint": "在 设置 › 手机操控 › 电脑 里打开一台，它会运行装在那里的智能体",
+  "agentsNew": "新对话",
+  "agentsNoSessions": "还没有对话",
+  "agentsNoneInstalled": "这台电脑上没有装支持的智能体：Claude Code、Codex、Antigravity、OpenCode 或 Gemini CLI",
+  "agentsStatusRunning": "工作中",
+  "agentsStatusIdle": "空闲",
+  "agentsStatusStarting": "启动中…",
+  "agentsStatusStopped": "已暂停 · 发消息时继续",
+  "agentsWaitingForYou": "等你确认",
+  "agentsNewTitle": "在「{computer}」上新建对话",
+  "@agentsNewTitle": {
+    "placeholders": {
+      "computer": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsPickAgent": "智能体",
+  "agentsPickFolder": "文件夹",
+  "agentsStartHere": "在这里开始",
+  "agentsUp": "上一级文件夹",
+  "agentsComposerHint": "给 {agent} 发消息",
+  "@agentsComposerHint": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsEndSession": "结束对话",
+  "agentsMode": "模式",
+  "agentsThinking": "思考",
+  "agentsPermissionTitle": "允许「{tool}」？",
+  "@agentsPermissionTitle": {
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsPermissionChosen": "已选择：{option}",
+  "@agentsPermissionChosen": {
+    "placeholders": {
+      "option": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsPermissionCancelled": "已不再等待",
+  "agentsPlan": "计划",
+  "agentsStopped": "已停止",
+  "agentsStoppedLength": "已停止：回复达到长度上限",
+  "agentsStoppedRefusal": "智能体拒绝继续",
+  "agentsStoppedOther": "已停止（{reason}）",
+  "@agentsStoppedOther": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsErrAuth": "{agent} 需要在电脑上登录：在那台电脑的终端里运行一次并登录",
+  "@agentsErrAuth": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsErrUnavailable": "这台电脑上没有装这个智能体",
+  "agentsErrExited": "智能体意外退出了",
+  "agentsErrOther": "出错了：{message}",
+  "@agentsErrOther": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsContextLost": "智能体重新启动了，之前的上下文没有保留",
+  "agentsOffline": "电脑没有连上，连上后才能发消息",
+  "agentsBusy": "智能体还在工作",
+  "agentsSendFailed": "没能发送（{code}）",
+  "@agentsSendFailed": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsEnv": "环境变量",
+  "agentsEnvNone": "未设置",
+  "agentsEnvCount": "{count} 个",
+  "@agentsEnvCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "agentsEnvTitle": "{agent} 的环境变量",
+  "@agentsEnvTitle": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsEnvHint": "智能体下次启动时生效。只加密存在这台手机上、只发给这台电脑；电脑只放在内存里，不写入磁盘",
+  "agentsEnvName": "变量名",
+  "agentsEnvValue": "值",
+  "agentsEnvBadName": "变量名只能用字母、数字和下划线，不能以数字开头",
+  "agentsEnvRemove": "删除 {name}",
+  "@agentsEnvRemove": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsEnvShow": "显示值",
+  "agentsEnvHide": "隐藏值",
+  "agentsEnvSaveFailed": "没能保存环境变量",
+  "agentsBypass": "跳过权限确认",
+  "agentsBypassHintMode": "智能体不再先问你；随时可以关掉",
+  "agentsBypassHintRestart": "智能体不再先问你；切换时它会重启（只在两轮之间）",
+  "agentsBypassTag": "跳过确认",
+  "agentsBypassRiskTitle": "让 {agent} 不经确认就运行命令、修改文件？",
+  "@agentsBypassRiskTitle": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsBypassRiskBody": "它在电脑上的每一步都不再先问你，包括删除文件、联网和安装软件。操控手机仍按这台手机的确认方式。",
+  "agentsBypassRiskAction": "跳过确认",
+  "agentsErrBypass": "这个智能体不能跳过确认",
+  "agentsEarlier": "这个文件夹里的对话",
+  "agentsEarlierEmpty": "这里还没有 {agent} 的对话",
+  "@agentsEarlierEmpty": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsEarlierUnlisted": "{agent} 不提供之前对话的列表，只显示从这台手机开始的",
+  "@agentsEarlierUnlisted": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsEarlierFailed": "读不到 {agent} 之前的对话（{code}）",
+  "@agentsEarlierFailed": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsEarlierOnComputer": "在电脑上 · {when}",
+  "@agentsEarlierOnComputer": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsEarlierNoLoad": "{agent} 不能重新打开之前的对话",
+  "@agentsEarlierNoLoad": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsResumed": "接着之前的对话继续；上面是智能体保存的记录",
+  "agentsErrResume": "这个智能体不能重新打开之前的对话",
+  "agentsErrMode": "智能体没有切换模式：{mode}",
+  "@agentsErrMode": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsSubfolders": "里面的文件夹",
+  "agentsBypassOnNote": "已跳过权限确认：{agent} 不会先问你就运行命令、修改文件",
+  "@agentsBypassOnNote": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  }
+}

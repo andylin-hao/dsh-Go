@@ -72,6 +72,7 @@
   "searchKwPhoneConfirm": "别问我,免确认,每次都询问,始终免确认,确认",
   "searchKwPhoneAutoCollapse": "悬浮条,收起,悬浮球",
   "searchKwPhoneReturn": "返回,完成后返回",
+  "searchKwPhoneComputers": "电脑,智能体,Claude Code,Codex,OpenCode,Antigravity,SSH,MCP,远程操控",
   "searchKwPhoneBackgroundGuide": "后台确认,返回 App",
   "searchKwAutoStart": "自动启动,开机启动,自启",
   "searchKwAutoSafe": "安全模式,自动安全模式",

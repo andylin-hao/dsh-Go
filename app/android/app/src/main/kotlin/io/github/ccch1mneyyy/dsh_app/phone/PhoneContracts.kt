@@ -224,8 +224,11 @@ interface ControlListener {
     /** 暂停 (true) / 继续 (false) on the status bar. */
     fun onPauseChanged(paused: Boolean) {}
 
-    /** 停止 on the status bar, screen off, keyguard, or the service going away. [reason] is Chinese. */
-    fun onStopRequested(reason: String) {}
+    /**
+     * 停止 on the status bar ([byPerson]), screen off, keyguard, or the service going away.
+     * [reason] is Chinese.
+     */
+    fun onStopRequested(reason: String, byPerson: Boolean = false) {}
 
     /** Text the person typed into 插话 and sent; meant for the agent as a user message. */
     fun onInterject(text: String) {}

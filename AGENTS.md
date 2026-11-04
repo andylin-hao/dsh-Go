@@ -9,6 +9,8 @@ app/                         Flutter App：原生界面、Riverpod 状态、l10n
 app/lib/l10n/parts/          界面文案的中英文 ARB 输入
 packages/dsh_client/         纯 Dart 客户端：HTTP/SSE、mux、会话与删除 API
 packages/dsh_remote/         远程传输：WebRTC / LAN / TURN / 中继
+packages/dsh_link/           dsh-go-link 的手机端：电脑上的智能体经 SSH 链路使用手机操控
+host/dsh-go-link/            电脑端 dsh-go-link（Node 单文件）：守护进程 + 给 Claude Code/Codex 等的 MCP 入口
 runtime/                     打补丁的 DSH 引擎运行时
 runtime/bridge/dsh-go-bridge/  App ↔ 引擎的 HTTP 桥（/dsh-go/v1/*，含会话删除路由）
 runtime/patches/             引擎补丁及其 pins.json（补丁与版本钉死）
@@ -25,6 +27,9 @@ docs/                        架构、发布、路线图、用户指南
 (cd app && flutter pub get && flutter analyze && flutter test)   # Flutter 应用
 (cd packages/dsh_client && dart pub get && dart analyze && dart test)
 (cd packages/dsh_remote && dart pub get && dart analyze && dart test)
+(cd packages/dsh_link && dart pub get && dart analyze && dart test)
+node --test host/dsh-go-link/test/*.test.mjs                       # 电脑端 dsh-go-link
+node host/dsh-go-link/scripts/sync-asset.mjs --check               # App 内置的 dsh-go-link 副本
 (cd sdk/plugin-kit && npm install && npm test)
 node --test runtime/tests/*.test.mjs                               # 引擎桥/补丁测试
 python3 app/tool/l10n_merge.py --check                             # 文案生成检查
@@ -51,6 +56,7 @@ CI（`.github/workflows/ci.yml`）在 PR 上跑通用检查和改动涉及的部
 - 用户指南改 `docs/guide/`，再跑 `python3 app/tool/guide_sync.py`。
 - 引擎补丁在 `runtime/patches/`：补丁文件与 `pins.json` 保持同步，不手改正被补丁覆盖的产物。
 - 插件教学技能改 `sdk/plugin-kit/skill/` 或 SDK 对应输入，再跑 `node sdk/plugin-kit/scripts/sync-skill.mjs`。
+- dsh-go-link 改 `host/dsh-go-link/bin/dsh-go-link.cjs`，再跑 `node host/dsh-go-link/scripts/sync-asset.mjs`；不手改 `app/assets/link/` 里的副本。
 
 ### 行为与契约
 

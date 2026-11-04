@@ -139,6 +139,7 @@
 | 3 | DS Bot 联动 | ☑️ 待真机：手机端的 Bot 团队、单聊与群聊、记忆、Bot 通知；抽屉列表顶部「DS Bot」一行收起 Bot 的全部对话（带未读数）。中继连接、推送待定 |
 | 5 | 手机操控 | ☑️ 待真机：核心桥（MCP 经 abstract unix socket 接入 DSH，回落 loopback TCP）、安全闸门、系统动作、通知确认、设置与引导页、无障碍读屏与操作、不打扰模式（虚拟屏，Shizuku 或自连 ADB，可选项）；确认方式三档（每次都询问 / 本任务免确认 / 始终免确认），密码、支付银行、系统设置三档都拦。停止键会经 App 取消正在运行的回合。真机联调未做 |
 | 4 | Claude Code / Codex 后端 | 只走 API Key 或原版 CLI 自行登录（Anthropic 条款） |
+| 6 | 电脑上的智能体用手机 | ☑️ 一至三期，局域网路径已在真机验证（vivo，Android 16）：`设置 › 手机操控 › 电脑` 按 SSH 主机开关，或用 `dsh-go-link pair` 的二维码在局域网配对（Noise IK，免 sshd）；Claude Code、Codex、OpenCode、Antigravity 等登记 `dsh-go-link mcp` 后就能用同一套手机工具，确认方式、应用名单、解除限制与本机一致，确认卡与操作记录写明是哪个智能体、哪台电脑。抽屉「电脑上的智能体」经 ACP 在电脑上运行 Claude Code、Codex、Antigravity、OpenCode、Gemini CLI（真机跑过前三个）；关掉 App 或断开时对话照常在电脑上跑，可以接上文件夹里之前的对话（含终端里开始的）而不打断正在运行的，可按智能体设环境变量，可跳过权限确认（Claude Code、Codex 随时切换，Antigravity 两轮之间重启切换）。SSH 路径、悬浮条停止键、网络切换未在真机跑；智能体在后台时的提问还没有通知。Relay 等上游。设计见 [design/remote-agents.md](design/remote-agents.md) |
 
 ## P4：平台
 

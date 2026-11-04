@@ -1,6 +1,6 @@
 # Phone control
 
-Let DSH read the screen, tap and type to get things done on your phone. Pause or stop it anytime. Phone control works only with this phone's engine and isn't loaded in Safe mode.
+Let DSH read the screen, tap and type to get things done on your phone. Pause or stop it anytime. Phone control works with this phone's engine, which doesn't load it in Safe mode, and with agents on computers you allow (see Computers below). Those computers can also run agent sessions you start from the phone.
 
 ## Turn it on
 
@@ -112,6 +112,36 @@ Disclaimer:
 - Any resulting loss to your accounts, money, data or device is yours to bear. DSH Go and its developers accept no liability.
 - Turn it on only when you need it, and off when you're done.
 - We advise against turning it on for a device that holds payment or banking details.
+
+## Computers
+
+<!-- nav: commonSettings,hubSettingsPhoneControl,phoneLinkTitle -->
+`Settings › Phone control › Computers`
+
+Agents on your SSH hosts, like Claude Code, Codex, OpenCode or Antigravity, can use this phone the way DSH does. This part shows once phone control is on.
+
+1. Turn on the switch next to a host and tap **Allow**. Connect to the host once in DSH Go first, so its key is confirmed. The computer needs Node.js 18 or later.
+2. DSH Go installs dsh-go-link in `~/.dsh-go/link` on that computer, starts it and stays connected, in the background too. The row says which agents are connected.
+3. Tap the host and copy the entry for each agent: a command for Claude Code, a config snippet for Codex, OpenCode and Antigravity. Each agent needs it once; the tools show up as `phone`.
+
+What agents do goes through the same confirmation, app rules and lifted limits as DSH. Approval cards, the floating bar and the action log name the agent and the computer, like "Claude Code · dev-box". The agent reports that name itself, so check the computer before you approve. One agent uses the phone at a time; the others are told it's busy. **Stop** ends the agent's work on the phone, and its next step tells the agent to stop.
+
+Screen text, and screenshots for vision models, go to that computer and to the model its agent uses. Turning the switch off disconnects the computer at once.
+
+A Mac or PC without SSH can be paired on the same network instead. Tap **Pair a computer on this network** and follow the steps: download dsh-go-link on the computer, run `node dsh-go-link.cjs pair`, and scan the QR code it shows with the phone's camera (or paste the link it prints). Check that the key on the confirmation matches what the computer shows, then tap **Pair**. The QR code works once, for 10 minutes. Afterwards the computer only accepts this phone, and the phone only that computer. **Forget this computer** in its sheet removes it; `node dsh-go-link.cjs peers remove <id>` does the same on the computer.
+
+### Agent sessions
+
+A connected computer with Claude Code, Codex, Antigravity, OpenCode or Gemini CLI installed can also run them for you: open **Agents on computers** in the drawer, or **Agent sessions** in the computer's sheet. Tap **New session**, pick the agent and a folder on the computer, and write. You see the answer, the tools it runs with their changes, its plan, and its questions; tap an answer to a question to let it go on. Each agent signs in on the computer with its own account; if it asks to, run it once in a terminal there.
+
+Sessions run on the computer: closing the app, losing the connection or locking the phone doesn't interrupt them, and they catch up when you're back. A session's agent gets this phone's tools by itself. When you tap Stop (on the floating bar, in the app or in the notification), its turn stops too; the screen turning off or accessibility dropping only stops the phone actions, and the agent carries on with its work on the computer.
+
+Once you've picked a folder, **Sessions in this folder** lists the agent's sessions there, including ones you started in a terminal on the computer. Tapping one that still runs on the computer just attaches to it without interrupting it; tapping another continues it, showing the history the agent kept first. If the same session is still open in a terminal, both carry on separately without interrupting each other.
+
+The new-session sheet and the session menu also have:
+
+- **Environment variables**: set for this agent on this computer, such as a proxy or a model endpoint. They apply the next time the agent starts. They're kept encrypted on this phone, and the computer keeps them in memory only.
+- **Skip permission prompts**: the agent runs commands and changes files without asking you first (Claude Code's bypassPermissions, Codex's full access, Antigravity's `--dangerously-skip-permissions`). You confirm each time you turn it on. Claude Code and Codex switch at any time; Antigravity restarts to switch, so only between turns. Using the phone still follows this phone's confirmation settings.
 
 ## Action log and advanced
 

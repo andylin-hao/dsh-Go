@@ -90,6 +90,34 @@ abstract final class RiskNotices {
     ask: AskAiTopic.phoneAlways,
   );
 
+  /// 手机操控 › 电脑: agents on [host] may use this phone (dsh-go-link). Asked per host, each time.
+  static RiskNotice phoneComputer(String host) => RiskNotice(
+    id: 'phone.computer-access',
+    level: RiskLevel.high,
+    title: appL10n.phoneLinkRiskTitle(host),
+    body: appL10n.phoneLinkRiskBody,
+    action: appL10n.phoneLinkRiskAction,
+  );
+
+  /// 手机操控 › 电脑 › 配对: a computer on this network from its pairing link; [fingerprint] to compare.
+  static RiskNotice phonePair(String name, String fingerprint) => RiskNotice(
+    id: 'phone.computer-pair',
+    level: RiskLevel.high,
+    title: appL10n.phoneLinkPairConfirmTitle(name),
+    body: appL10n.phoneLinkPairConfirmBody(fingerprint),
+    action: appL10n.phoneLinkPairAction,
+  );
+
+  /// 电脑上的智能体 › 跳过权限确认: [agent] on a computer stops asking before what it does there.
+  /// Asked each time it is turned on.
+  static RiskNotice agentBypass(String agent) => RiskNotice(
+    id: 'agents.bypass',
+    level: RiskLevel.high,
+    title: appL10n.agentsBypassRiskTitle(agent),
+    body: appL10n.agentsBypassRiskBody,
+    action: appL10n.agentsBypassRiskAction,
+  );
+
   /// 应用名单: 不碰 → 照常 ([fromDeny]) or 每一步都确认 → 照常.
   static RiskNotice appRule(String app, {required bool fromDeny}) => RiskNotice(
     id: fromDeny ? 'phone.app-rule.allow' : 'phone.app-rule.skip-steps',

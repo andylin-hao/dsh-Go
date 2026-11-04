@@ -150,6 +150,11 @@
     <string name="pet_answer_failed">Didn’t go through. Open the app</string>
     <!-- phone -->
     <string name="phone_running">DSH is controlling the phone</string>
+    <!-- An agent on a computer (dsh-go-link) asks: "Claude Code · dev-box: Tap “Send”". -->
+    <string name="phone_origin_asks">%1$s: %2$s</string>
+    <!-- dsh-go-link: the foreground notification while computers may use the phone. -->
+    <string name="phone_link_channel">Computers</string>
+    <string name="phone_link_running">Linked with your computers: their agents can use this phone</string>
     <string name="phone_a11y_connecting">Accessibility hasn’t connected. Wait a few seconds, or turn it off and on in Settings.</string>
     <string name="phone_a11y_off">Accessibility is off.</string>
     <string name="phone_a11y_unavailable">Accessibility is unavailable.</string>

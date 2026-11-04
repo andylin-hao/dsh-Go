@@ -176,6 +176,13 @@ packages:
       relative: true
     source: path
     version: "0.1.0"
+  dsh_link:
+    dependency: "direct main"
+    description:
+      path: "../packages/dsh_link"
+      relative: true
+    source: path
+    version: "0.1.0"
   dsh_remote:
     dependency: "direct main"
     description:

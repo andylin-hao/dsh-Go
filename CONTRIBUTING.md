@@ -57,6 +57,15 @@
 ```bash
 (cd packages/dsh_client && dart pub get && dart analyze && dart test)
 (cd packages/dsh_remote && dart pub get && dart analyze && dart test)
+(cd packages/dsh_link && dart pub get && dart analyze && dart test)
+```
+
+**dsh-go-link（电脑上的智能体使用手机）：** 修改 `host/dsh-go-link/bin/dsh-go-link.cjs`，测试后同步到 App 经 SSH 安装的资产：
+
+```bash
+node --test host/dsh-go-link/test/*.test.mjs
+node host/dsh-go-link/scripts/sync-asset.mjs
+node host/dsh-go-link/scripts/sync-asset.mjs --check
 ```
 
 **插件 SDK：**

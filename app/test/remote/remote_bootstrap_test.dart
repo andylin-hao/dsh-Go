@@ -80,7 +80,9 @@ DSHAPP url dsh web: http://127.0.0.1:51234/?token=launch-tok
           isA<HostLinkError>()
               .having((e) => e.kind, 'kind', HostLinkErrorKind.dshNotFound)
               .having((e) => e.retryable, 'retryable', isFalse)
-              .having((e) => e.detail, 'detail', contains('npm install -g @deepseek-ai/dsh')),
+              .having((e) => e.detail, 'detail', contains('npm install -g @deepseek-ai/dsh'))
+              // Phone control alone needs no DSH: the message says where to turn it on.
+              .having((e) => e.message, 'message', contains('手机操控')),
         ),
       );
     });

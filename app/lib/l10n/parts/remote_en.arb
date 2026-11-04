@@ -39,6 +39,7 @@
   "remoteBootstrapStarting": "Starting remote DSH…",
   "remoteErrCommandNotFound": "“{command}” not found on the host",
   "remoteErrDshMissing": "dsh isn’t installed on the host. Install it and retry, or enter its full path as the start command.",
+  "remoteErrDshMissingPhoneLink": "Only want this computer’s agents to use the phone? DSH isn’t needed: save the host, then turn it on in Settings › Phone control › Computers",
   "remoteStartCommandExample": "Example start command: ~/.nvm/versions/node/v22.0.0/bin/dsh web",
   "remoteErrDshStartTimeout": "Remote DSH took too long to start",
   "remoteErrDshExited": "Remote DSH exited right after starting",

@@ -18368,6 +18368,312 @@ abstract class L10n {
   /// **'没连上；下次打开 App 或开始操控时再试'**
   String get phoneKeepFailed;
 
+  /// No description provided for @phoneLinkTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'电脑'**
+  String get phoneLinkTitle;
+
+  /// No description provided for @phoneLinkHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'让 SSH 主机上的智能体使用这台手机，比如 Claude Code、Codex、OpenCode、Antigravity。'**
+  String get phoneLinkHint;
+
+  /// No description provided for @phoneLinkNoHosts.
+  ///
+  /// In zh, this message translates to:
+  /// **'还没有 SSH 主机'**
+  String get phoneLinkNoHosts;
+
+  /// No description provided for @phoneLinkNoHostsHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'先在主机切换里添加一台，再回这里打开。'**
+  String get phoneLinkNoHostsHint;
+
+  /// No description provided for @phoneLinkOff.
+  ///
+  /// In zh, this message translates to:
+  /// **'未开启'**
+  String get phoneLinkOff;
+
+  /// No description provided for @phoneLinkConnecting.
+  ///
+  /// In zh, this message translates to:
+  /// **'连接中…'**
+  String get phoneLinkConnecting;
+
+  /// No description provided for @phoneLinkAttached.
+  ///
+  /// In zh, this message translates to:
+  /// **'已连接 · 还没有智能体'**
+  String get phoneLinkAttached;
+
+  /// No description provided for @phoneLinkAttachedAgents.
+  ///
+  /// In zh, this message translates to:
+  /// **'已连接 · {agents}'**
+  String phoneLinkAttachedAgents(String agents);
+
+  /// No description provided for @phoneLinkWaiting.
+  ///
+  /// In zh, this message translates to:
+  /// **'重新连接中 · {reason}'**
+  String phoneLinkWaiting(String reason);
+
+  /// No description provided for @phoneLinkErrHostKeyUnknown.
+  ///
+  /// In zh, this message translates to:
+  /// **'先在 DSH Go 里连接一次这台主机，确认它的密钥'**
+  String get phoneLinkErrHostKeyUnknown;
+
+  /// No description provided for @phoneLinkErrHostKeyChanged.
+  ///
+  /// In zh, this message translates to:
+  /// **'主机密钥变了，请到主机页面核对'**
+  String get phoneLinkErrHostKeyChanged;
+
+  /// No description provided for @phoneLinkErrNoShell.
+  ///
+  /// In zh, this message translates to:
+  /// **'主机上没有 POSIX shell'**
+  String get phoneLinkErrNoShell;
+
+  /// No description provided for @phoneLinkErrNodeMissing.
+  ///
+  /// In zh, this message translates to:
+  /// **'电脑上没有安装 Node.js'**
+  String get phoneLinkErrNodeMissing;
+
+  /// No description provided for @phoneLinkErrNodeOld.
+  ///
+  /// In zh, this message translates to:
+  /// **'Node.js {version} 太旧，需要 18 或更新的版本'**
+  String phoneLinkErrNodeOld(String version);
+
+  /// No description provided for @phoneLinkErrInstall.
+  ///
+  /// In zh, this message translates to:
+  /// **'没能在电脑上安装 dsh-go-link'**
+  String get phoneLinkErrInstall;
+
+  /// No description provided for @phoneLinkErrStart.
+  ///
+  /// In zh, this message translates to:
+  /// **'dsh-go-link 没能在电脑上启动'**
+  String get phoneLinkErrStart;
+
+  /// No description provided for @phoneLinkErrRefused.
+  ///
+  /// In zh, this message translates to:
+  /// **'dsh-go-link 拒绝了连接'**
+  String get phoneLinkErrRefused;
+
+  /// No description provided for @phoneLinkErrReplaced.
+  ///
+  /// In zh, this message translates to:
+  /// **'另一台手机连上了这台电脑'**
+  String get phoneLinkErrReplaced;
+
+  /// No description provided for @phoneLinkErrLost.
+  ///
+  /// In zh, this message translates to:
+  /// **'连接断开了'**
+  String get phoneLinkErrLost;
+
+  /// No description provided for @phoneLinkErrSsh.
+  ///
+  /// In zh, this message translates to:
+  /// **'连不上主机'**
+  String get phoneLinkErrSsh;
+
+  /// No description provided for @phoneLinkWorking.
+  ///
+  /// In zh, this message translates to:
+  /// **'{agent} 正在操作手机'**
+  String phoneLinkWorking(String agent);
+
+  /// No description provided for @phoneLinkSetup.
+  ///
+  /// In zh, this message translates to:
+  /// **'设置智能体'**
+  String get phoneLinkSetup;
+
+  /// No description provided for @phoneLinkSetupTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'「{host}」上的手机工具'**
+  String phoneLinkSetupTitle(String host);
+
+  /// No description provided for @phoneLinkSetupBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'给每个智能体登记一次手机工具。它们以「phone」出现，这个开关开着时可用。'**
+  String get phoneLinkSetupBody;
+
+  /// No description provided for @phoneLinkSetupRun.
+  ///
+  /// In zh, this message translates to:
+  /// **'在终端运行'**
+  String get phoneLinkSetupRun;
+
+  /// No description provided for @phoneLinkSetupAddTo.
+  ///
+  /// In zh, this message translates to:
+  /// **'加到 {file}'**
+  String phoneLinkSetupAddTo(String file);
+
+  /// No description provided for @phoneLinkSetupLoading.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在从电脑读取路径…'**
+  String get phoneLinkSetupLoading;
+
+  /// No description provided for @phoneLinkSetupFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'读取失败：{reason}'**
+  String phoneLinkSetupFailed(String reason);
+
+  /// No description provided for @phoneLinkSetupNote.
+  ///
+  /// In zh, this message translates to:
+  /// **'确认方式、应用名单和已解除的限制与 DSH 一样生效。智能体按它自报的名字显示，确认前请留意是哪台电脑。'**
+  String get phoneLinkSetupNote;
+
+  /// No description provided for @phoneLinkRiskTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'允许「{host}」上的智能体使用这台手机？'**
+  String phoneLinkRiskTitle(String host);
+
+  /// No description provided for @phoneLinkRiskBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'它们能读屏、点按和输入，确认方式和限制与 DSH 相同。屏幕文字会发到那台电脑，以及它的智能体所用的模型。'**
+  String get phoneLinkRiskBody;
+
+  /// No description provided for @phoneLinkRiskAction.
+  ///
+  /// In zh, this message translates to:
+  /// **'允许'**
+  String get phoneLinkRiskAction;
+
+  /// No description provided for @phoneLinkErrUnreachable.
+  ///
+  /// In zh, this message translates to:
+  /// **'在这个网络上连不到这台电脑'**
+  String get phoneLinkErrUnreachable;
+
+  /// No description provided for @phoneLinkErrNotPaired.
+  ///
+  /// In zh, this message translates to:
+  /// **'这台电脑不再接受这台手机，请重新配对'**
+  String get phoneLinkErrNotPaired;
+
+  /// No description provided for @phoneLinkPair.
+  ///
+  /// In zh, this message translates to:
+  /// **'配对局域网里的电脑'**
+  String get phoneLinkPair;
+
+  /// No description provided for @phoneLinkPairHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'适合没开 SSH 的 Mac 或 PC，电脑上需要 Node.js 18 或更新版本'**
+  String get phoneLinkPairHint;
+
+  /// No description provided for @phoneLinkPairTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'配对电脑'**
+  String get phoneLinkPairTitle;
+
+  /// No description provided for @phoneLinkPairStep1.
+  ///
+  /// In zh, this message translates to:
+  /// **'在电脑上下载 dsh-go-link：'**
+  String get phoneLinkPairStep1;
+
+  /// No description provided for @phoneLinkPairStep2.
+  ///
+  /// In zh, this message translates to:
+  /// **'然后开始配对，它会显示一个二维码：'**
+  String get phoneLinkPairStep2;
+
+  /// No description provided for @phoneLinkPairStep3.
+  ///
+  /// In zh, this message translates to:
+  /// **'用这台手机的相机扫描二维码，或者粘贴它打印出的链接：'**
+  String get phoneLinkPairStep3;
+
+  /// No description provided for @phoneLinkPairPaste.
+  ///
+  /// In zh, this message translates to:
+  /// **'粘贴链接'**
+  String get phoneLinkPairPaste;
+
+  /// No description provided for @phoneLinkPairInvalid.
+  ///
+  /// In zh, this message translates to:
+  /// **'这不是 dsh-go-link 的配对链接'**
+  String get phoneLinkPairInvalid;
+
+  /// No description provided for @phoneLinkPairConfirmTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'与「{name}」配对？'**
+  String phoneLinkPairConfirmTitle(String name);
+
+  /// No description provided for @phoneLinkPairConfirmBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'它上面的智能体将可以使用这台手机，确认方式和限制与 DSH 相同。屏幕文字会发到那台电脑，以及它的智能体所用的模型。它的密钥：{fingerprint}'**
+  String phoneLinkPairConfirmBody(String fingerprint);
+
+  /// No description provided for @phoneLinkPairAction.
+  ///
+  /// In zh, this message translates to:
+  /// **'配对'**
+  String get phoneLinkPairAction;
+
+  /// No description provided for @phoneLinkPaired.
+  ///
+  /// In zh, this message translates to:
+  /// **'已与 {name} 配对'**
+  String phoneLinkPaired(String name);
+
+  /// No description provided for @phoneLinkPairNeedsPhoneControl.
+  ///
+  /// In zh, this message translates to:
+  /// **'请先打开手机操控，再打开这个链接'**
+  String get phoneLinkPairNeedsPhoneControl;
+
+  /// No description provided for @phoneLinkForget.
+  ///
+  /// In zh, this message translates to:
+  /// **'忘记这台电脑'**
+  String get phoneLinkForget;
+
+  /// No description provided for @phoneLinkKey.
+  ///
+  /// In zh, this message translates to:
+  /// **'密钥 {fingerprint}'**
+  String phoneLinkKey(String fingerprint);
+
+  /// No description provided for @phoneLinkAgents.
+  ///
+  /// In zh, this message translates to:
+  /// **'智能体对话'**
+  String get phoneLinkAgents;
+
+  /// No description provided for @phoneLinkAgentsHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'在那台电脑上启动 Claude Code、Codex 或 OpenCode，在这里跟进'**
+  String get phoneLinkAgentsHint;
+
   /// No description provided for @phoneModeTitle.
   ///
   /// In zh, this message translates to:
@@ -22328,6 +22634,12 @@ abstract class L10n {
   /// **'主机上没有 dsh，装好后重试，或在启动命令里填完整路径'**
   String get remoteErrDshMissing;
 
+  /// No description provided for @remoteErrDshMissingPhoneLink.
+  ///
+  /// In zh, this message translates to:
+  /// **'只想让这台电脑上的智能体使用手机？不需要 DSH：保存主机，再到 设置 › 手机操控 › 电脑 里打开它'**
+  String get remoteErrDshMissingPhoneLink;
+
   /// No description provided for @remoteStartCommandExample.
   ///
   /// In zh, this message translates to:
@@ -24638,6 +24950,414 @@ abstract class L10n {
   /// **'最近观测'**
   String get remoteNetworkObservedAt;
 
+  /// No description provided for @agentsTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'电脑上的智能体'**
+  String get agentsTitle;
+
+  /// No description provided for @agentsSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'在你电脑上运行的 Claude Code、Codex、Antigravity 和 OpenCode'**
+  String get agentsSubtitle;
+
+  /// No description provided for @agentsEmpty.
+  ///
+  /// In zh, this message translates to:
+  /// **'还没有连上能运行智能体的电脑'**
+  String get agentsEmpty;
+
+  /// No description provided for @agentsEmptyHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'在 设置 › 手机操控 › 电脑 里打开一台，它会运行装在那里的智能体'**
+  String get agentsEmptyHint;
+
+  /// No description provided for @agentsNew.
+  ///
+  /// In zh, this message translates to:
+  /// **'新对话'**
+  String get agentsNew;
+
+  /// No description provided for @agentsNoSessions.
+  ///
+  /// In zh, this message translates to:
+  /// **'还没有对话'**
+  String get agentsNoSessions;
+
+  /// No description provided for @agentsNoneInstalled.
+  ///
+  /// In zh, this message translates to:
+  /// **'这台电脑上没有装支持的智能体：Claude Code、Codex、Antigravity、OpenCode 或 Gemini CLI'**
+  String get agentsNoneInstalled;
+
+  /// No description provided for @agentsStatusRunning.
+  ///
+  /// In zh, this message translates to:
+  /// **'工作中'**
+  String get agentsStatusRunning;
+
+  /// No description provided for @agentsStatusIdle.
+  ///
+  /// In zh, this message translates to:
+  /// **'空闲'**
+  String get agentsStatusIdle;
+
+  /// No description provided for @agentsStatusStarting.
+  ///
+  /// In zh, this message translates to:
+  /// **'启动中…'**
+  String get agentsStatusStarting;
+
+  /// No description provided for @agentsStatusStopped.
+  ///
+  /// In zh, this message translates to:
+  /// **'已暂停 · 发消息时继续'**
+  String get agentsStatusStopped;
+
+  /// No description provided for @agentsWaitingForYou.
+  ///
+  /// In zh, this message translates to:
+  /// **'等你确认'**
+  String get agentsWaitingForYou;
+
+  /// No description provided for @agentsNewTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'在「{computer}」上新建对话'**
+  String agentsNewTitle(String computer);
+
+  /// No description provided for @agentsPickAgent.
+  ///
+  /// In zh, this message translates to:
+  /// **'智能体'**
+  String get agentsPickAgent;
+
+  /// No description provided for @agentsPickFolder.
+  ///
+  /// In zh, this message translates to:
+  /// **'文件夹'**
+  String get agentsPickFolder;
+
+  /// No description provided for @agentsStartHere.
+  ///
+  /// In zh, this message translates to:
+  /// **'在这里开始'**
+  String get agentsStartHere;
+
+  /// No description provided for @agentsUp.
+  ///
+  /// In zh, this message translates to:
+  /// **'上一级文件夹'**
+  String get agentsUp;
+
+  /// No description provided for @agentsComposerHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'给 {agent} 发消息'**
+  String agentsComposerHint(String agent);
+
+  /// No description provided for @agentsEndSession.
+  ///
+  /// In zh, this message translates to:
+  /// **'结束对话'**
+  String get agentsEndSession;
+
+  /// No description provided for @agentsMode.
+  ///
+  /// In zh, this message translates to:
+  /// **'模式'**
+  String get agentsMode;
+
+  /// No description provided for @agentsThinking.
+  ///
+  /// In zh, this message translates to:
+  /// **'思考'**
+  String get agentsThinking;
+
+  /// No description provided for @agentsPermissionTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'允许「{tool}」？'**
+  String agentsPermissionTitle(String tool);
+
+  /// No description provided for @agentsPermissionChosen.
+  ///
+  /// In zh, this message translates to:
+  /// **'已选择：{option}'**
+  String agentsPermissionChosen(String option);
+
+  /// No description provided for @agentsPermissionCancelled.
+  ///
+  /// In zh, this message translates to:
+  /// **'已不再等待'**
+  String get agentsPermissionCancelled;
+
+  /// No description provided for @agentsPlan.
+  ///
+  /// In zh, this message translates to:
+  /// **'计划'**
+  String get agentsPlan;
+
+  /// No description provided for @agentsStopped.
+  ///
+  /// In zh, this message translates to:
+  /// **'已停止'**
+  String get agentsStopped;
+
+  /// No description provided for @agentsStoppedLength.
+  ///
+  /// In zh, this message translates to:
+  /// **'已停止：回复达到长度上限'**
+  String get agentsStoppedLength;
+
+  /// No description provided for @agentsStoppedRefusal.
+  ///
+  /// In zh, this message translates to:
+  /// **'智能体拒绝继续'**
+  String get agentsStoppedRefusal;
+
+  /// No description provided for @agentsStoppedOther.
+  ///
+  /// In zh, this message translates to:
+  /// **'已停止（{reason}）'**
+  String agentsStoppedOther(String reason);
+
+  /// No description provided for @agentsErrAuth.
+  ///
+  /// In zh, this message translates to:
+  /// **'{agent} 需要在电脑上登录：在那台电脑的终端里运行一次并登录'**
+  String agentsErrAuth(String agent);
+
+  /// No description provided for @agentsErrUnavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'这台电脑上没有装这个智能体'**
+  String get agentsErrUnavailable;
+
+  /// No description provided for @agentsErrExited.
+  ///
+  /// In zh, this message translates to:
+  /// **'智能体意外退出了'**
+  String get agentsErrExited;
+
+  /// No description provided for @agentsErrOther.
+  ///
+  /// In zh, this message translates to:
+  /// **'出错了：{message}'**
+  String agentsErrOther(String message);
+
+  /// No description provided for @agentsContextLost.
+  ///
+  /// In zh, this message translates to:
+  /// **'智能体重新启动了，之前的上下文没有保留'**
+  String get agentsContextLost;
+
+  /// No description provided for @agentsOffline.
+  ///
+  /// In zh, this message translates to:
+  /// **'电脑没有连上，连上后才能发消息'**
+  String get agentsOffline;
+
+  /// No description provided for @agentsBusy.
+  ///
+  /// In zh, this message translates to:
+  /// **'智能体还在工作'**
+  String get agentsBusy;
+
+  /// No description provided for @agentsSendFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'没能发送（{code}）'**
+  String agentsSendFailed(String code);
+
+  /// No description provided for @agentsEnv.
+  ///
+  /// In zh, this message translates to:
+  /// **'环境变量'**
+  String get agentsEnv;
+
+  /// No description provided for @agentsEnvNone.
+  ///
+  /// In zh, this message translates to:
+  /// **'未设置'**
+  String get agentsEnvNone;
+
+  /// No description provided for @agentsEnvCount.
+  ///
+  /// In zh, this message translates to:
+  /// **'{count} 个'**
+  String agentsEnvCount(int count);
+
+  /// No description provided for @agentsEnvTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'{agent} 的环境变量'**
+  String agentsEnvTitle(String agent);
+
+  /// No description provided for @agentsEnvHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'智能体下次启动时生效。只加密存在这台手机上、只发给这台电脑；电脑只放在内存里，不写入磁盘'**
+  String get agentsEnvHint;
+
+  /// No description provided for @agentsEnvName.
+  ///
+  /// In zh, this message translates to:
+  /// **'变量名'**
+  String get agentsEnvName;
+
+  /// No description provided for @agentsEnvValue.
+  ///
+  /// In zh, this message translates to:
+  /// **'值'**
+  String get agentsEnvValue;
+
+  /// No description provided for @agentsEnvBadName.
+  ///
+  /// In zh, this message translates to:
+  /// **'变量名只能用字母、数字和下划线，不能以数字开头'**
+  String get agentsEnvBadName;
+
+  /// No description provided for @agentsEnvRemove.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除 {name}'**
+  String agentsEnvRemove(String name);
+
+  /// No description provided for @agentsEnvShow.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示值'**
+  String get agentsEnvShow;
+
+  /// No description provided for @agentsEnvHide.
+  ///
+  /// In zh, this message translates to:
+  /// **'隐藏值'**
+  String get agentsEnvHide;
+
+  /// No description provided for @agentsEnvSaveFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'没能保存环境变量'**
+  String get agentsEnvSaveFailed;
+
+  /// No description provided for @agentsBypass.
+  ///
+  /// In zh, this message translates to:
+  /// **'跳过权限确认'**
+  String get agentsBypass;
+
+  /// No description provided for @agentsBypassHintMode.
+  ///
+  /// In zh, this message translates to:
+  /// **'智能体不再先问你；随时可以关掉'**
+  String get agentsBypassHintMode;
+
+  /// No description provided for @agentsBypassHintRestart.
+  ///
+  /// In zh, this message translates to:
+  /// **'智能体不再先问你；切换时它会重启（只在两轮之间）'**
+  String get agentsBypassHintRestart;
+
+  /// No description provided for @agentsBypassTag.
+  ///
+  /// In zh, this message translates to:
+  /// **'跳过确认'**
+  String get agentsBypassTag;
+
+  /// No description provided for @agentsBypassRiskTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'让 {agent} 不经确认就运行命令、修改文件？'**
+  String agentsBypassRiskTitle(String agent);
+
+  /// No description provided for @agentsBypassRiskBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'它在电脑上的每一步都不再先问你，包括删除文件、联网和安装软件。操控手机仍按这台手机的确认方式。'**
+  String get agentsBypassRiskBody;
+
+  /// No description provided for @agentsBypassRiskAction.
+  ///
+  /// In zh, this message translates to:
+  /// **'跳过确认'**
+  String get agentsBypassRiskAction;
+
+  /// No description provided for @agentsErrBypass.
+  ///
+  /// In zh, this message translates to:
+  /// **'这个智能体不能跳过确认'**
+  String get agentsErrBypass;
+
+  /// No description provided for @agentsEarlier.
+  ///
+  /// In zh, this message translates to:
+  /// **'这个文件夹里的对话'**
+  String get agentsEarlier;
+
+  /// No description provided for @agentsEarlierEmpty.
+  ///
+  /// In zh, this message translates to:
+  /// **'这里还没有 {agent} 的对话'**
+  String agentsEarlierEmpty(String agent);
+
+  /// No description provided for @agentsEarlierUnlisted.
+  ///
+  /// In zh, this message translates to:
+  /// **'{agent} 不提供之前对话的列表，只显示从这台手机开始的'**
+  String agentsEarlierUnlisted(String agent);
+
+  /// No description provided for @agentsEarlierFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'读不到 {agent} 之前的对话（{code}）'**
+  String agentsEarlierFailed(String agent, String code);
+
+  /// No description provided for @agentsEarlierOnComputer.
+  ///
+  /// In zh, this message translates to:
+  /// **'在电脑上 · {when}'**
+  String agentsEarlierOnComputer(String when);
+
+  /// No description provided for @agentsEarlierNoLoad.
+  ///
+  /// In zh, this message translates to:
+  /// **'{agent} 不能重新打开之前的对话'**
+  String agentsEarlierNoLoad(String agent);
+
+  /// No description provided for @agentsResumed.
+  ///
+  /// In zh, this message translates to:
+  /// **'接着之前的对话继续；上面是智能体保存的记录'**
+  String get agentsResumed;
+
+  /// No description provided for @agentsErrResume.
+  ///
+  /// In zh, this message translates to:
+  /// **'这个智能体不能重新打开之前的对话'**
+  String get agentsErrResume;
+
+  /// No description provided for @agentsErrMode.
+  ///
+  /// In zh, this message translates to:
+  /// **'智能体没有切换模式：{mode}'**
+  String agentsErrMode(String mode);
+
+  /// No description provided for @agentsSubfolders.
+  ///
+  /// In zh, this message translates to:
+  /// **'里面的文件夹'**
+  String get agentsSubfolders;
+
+  /// No description provided for @agentsBypassOnNote.
+  ///
+  /// In zh, this message translates to:
+  /// **'已跳过权限确认：{agent} 不会先问你就运行命令、修改文件'**
+  String agentsBypassOnNote(String agent);
+
   /// No description provided for @stateWorkspaceFilesHint.
   ///
   /// In zh, this message translates to:
@@ -25303,6 +26023,12 @@ abstract class L10n {
   /// In zh, this message translates to:
   /// **'返回,完成后返回'**
   String get searchKwPhoneReturn;
+
+  /// No description provided for @searchKwPhoneComputers.
+  ///
+  /// In zh, this message translates to:
+  /// **'电脑,智能体,Claude Code,Codex,OpenCode,Antigravity,SSH,MCP,远程操控'**
+  String get searchKwPhoneComputers;
 
   /// No description provided for @searchKwPhoneBackgroundGuide.
   ///
