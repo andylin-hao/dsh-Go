@@ -383,6 +383,64 @@ void main() {
       ]);
     });
 
+    test('an Anthropic listing refused for its x-api-key is asked again with Bearer, same URL', () async {
+      // A gateway whose /v1/models reads only `Authorization: Bearer` (seen on a real one).
+      container = start(
+        FakeProviderBackend()
+          ..discoverFor = (url) =>
+              url == 'https://relay.example.cn/v1' ? discovered : listingRefused('https://relay.example.cn/v1', 401),
+      );
+      for (final base in ['https://relay.example.cn', 'https://relay.example.cn/v1/']) {
+        backend.calls.clear();
+        final result = await container
+            .read(providerActionsProvider)
+            .discover(api: ProviderApi.anthropicMessages, baseUrl: base, existingId: 'custom-claude-relay');
+        expect(result.models, hasLength(3));
+        // The provider keeps its own Base URL and protocol; only the listing went the OpenAI way.
+        expect(result.baseUrl, base);
+        expect(
+          backend.calls.where((c) => c.$1 == 'discover').map((c) => (c.$2['api'], c.$2['baseURL'], c.$2['provider'])),
+          [
+            ('anthropic-messages', base, 'custom-claude-relay'),
+            ('openai-completions', 'https://relay.example.cn/v1', 'custom-claude-relay'),
+          ],
+        );
+      }
+    });
+
+    test('the connection test of an Anthropic provider takes the same second ask', () async {
+      container = start(
+        FakeProviderBackend(profiles: const [claudeRelay])
+          ..discoverFor = (url) =>
+              url == 'https://relay.example.cn/v1' ? discovered : listingRefused('https://relay.example.cn/v1', 401),
+      );
+      final relay = (await container.read(customProvidersProvider.future))!.byId('custom-claude-relay')!;
+      backend.calls.clear();
+      expect(await container.read(providerActionsProvider).test(relay), 3);
+      expect(backend.calls.where((c) => c.$1 == 'discover').map((c) => c.$2['api']), [
+        'anthropic-messages',
+        'openai-completions',
+      ]);
+    });
+
+    test('an Anthropic listing refused twice, or for another reason, keeps the first error', () async {
+      container = start(FakeProviderBackend()..discoverError = listingRefused('https://relay.example.cn/v1', 403));
+      final actions = container.read(providerActionsProvider);
+      await expectLater(
+        actions.discover(api: ProviderApi.anthropicMessages, baseUrl: 'https://relay.example.cn', apiKey: 'bad'),
+        throwsA(isA<DshRemoteException>().having((e) => e.message, 'message', contains('answered 403'))),
+      );
+      expect(backend.calls.where((c) => c.$1 == 'discover'), hasLength(2));
+      backend
+        ..calls.clear()
+        ..discoverError = listingRefused('https://relay.example.cn/v1', 500);
+      await expectLater(
+        actions.discover(api: ProviderApi.anthropicMessages, baseUrl: 'https://relay.example.cn'),
+        throwsA(isA<DshRemoteException>()),
+      );
+      expect(backend.calls.where((c) => c.$1 == 'discover'), hasLength(1));
+    });
+
     test('discover does not guess for paths, Anthropic, or other failures', () async {
       container = start(FakeProviderBackend()..discoverError = listingRefused('https://gw.example.com/api', 404));
       final actions = container.read(providerActionsProvider);

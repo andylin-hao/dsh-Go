@@ -518,6 +518,7 @@ class ProviderActions {
     try {
       return (models: await ask(baseUrl), baseUrl: baseUrl);
     } on DshRemoteException catch (error) {
+      if (api == ProviderApi.anthropicMessages) return _anthropicWithBearer(baseUrl, existingId, apiKey, error);
       final uri = Uri.tryParse(baseUrl);
       final bare = uri != null && (uri.path.isEmpty || uri.path == '/');
       final notFound = RegExp(r'answered 404').hasMatch(error.message);
@@ -528,6 +529,34 @@ class ProviderActions {
       } catch (_) {
         throw error;
       }
+    }
+  }
+
+  /// The Anthropic listing (`GET {root}/v1/models`, key in `x-api-key`) refused with 401 or 403:
+  /// many gateways read only `Authorization: Bearer` there (one answers "Wrong Bearer Token or
+  /// Token is nil" while its `/v1/messages` takes `x-api-key`). Ask the same URL once more the
+  /// OpenAI way, which sends the key as Bearer. Only the listing changes: the provider keeps its
+  /// protocol and Base URL. Any other failure, or a second refusal, is the first error.
+  Future<({List<DiscoveredModel> models, String baseUrl})> _anthropicWithBearer(
+    String baseUrl,
+    String? existingId,
+    String apiKey,
+    DshRemoteException error,
+  ) async {
+    final status = RegExp(r'answered (\d{3})').firstMatch(error.message)?.group(1);
+    if (status != '401' && status != '403') throw error;
+    var root = baseUrl.replaceFirst(RegExp(r'/+$'), '');
+    if (root.endsWith('/v1')) root = root.substring(0, root.length - 3);
+    try {
+      final models = await _backend.discover(
+        provider: existingId,
+        baseUrl: '$root/v1',
+        api: ProviderApi.openaiCompletions,
+        apiKey: apiKey.isEmpty ? null : apiKey,
+      );
+      return (models: models, baseUrl: baseUrl);
+    } catch (_) {
+      throw error;
     }
   }
 
@@ -641,10 +670,16 @@ class ProviderActions {
   }
 
   /// A cheap health check: the endpoint's model listing with the stored key
-  /// (`GET /models`, no tokens spent). Returns how many models it lists.
+  /// (`GET /models`, no tokens spent), asked again with Bearer for an
+  /// Anthropic gateway that refuses `x-api-key` there, as [discover] does.
+  /// Returns how many models it lists.
   Future<int> test(CustomProvider provider) async {
-    final models = await _backend.discover(provider: provider.id, baseUrl: provider.baseUrl, api: provider.api);
-    return models.length;
+    try {
+      return (await _backend.discover(provider: provider.id, baseUrl: provider.baseUrl, api: provider.api)).length;
+    } on DshRemoteException catch (error) {
+      if (provider.api != ProviderApi.anthropicMessages) rethrow;
+      return (await _anthropicWithBearer(provider.baseUrl, provider.id, '', error)).models.length;
+    }
   }
 }
 
