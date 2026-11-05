@@ -1216,6 +1216,8 @@ class Daemon {
     this.shimToken = crypto.randomBytes(32).toString('hex')
     this.catalog = readJson(this.files.catalog)
     this.channels = new Map()
+    /** Every connection accepted (agents, the phone, the network), so closing never waits on one. */
+    this.sockets = new Set()
     this.nextChannel = 1
     this.phone = null
     this.port = null
@@ -1264,7 +1266,7 @@ class Daemon {
     const bound = await listenExclusive(this.shimServer, where)
     if (!bound) return false
     if (process.platform !== 'win32') { try { fs.chmodSync(where, 0o600) } catch (e) {} }
-    this.phoneServer = net.createServer((sock) => this.onPhone(sock))
+    this.phoneServer = net.createServer((sock) => { this.track(sock); this.onPhone(sock) })
     await new Promise((resolve, reject) => {
       this.phoneServer.once('error', reject)
       this.phoneServer.listen(0, '127.0.0.1', resolve)
@@ -1338,6 +1340,8 @@ class Daemon {
     clearInterval(this.idleTimer)
     if (this.phone) this.dropPhone(this.phone, code)
     for (const ch of this.channels.values()) ch.sock.destroy()
+    // Ones that never finished their hello (or arrived while closing) would hold the servers open.
+    for (const sock of this.sockets) sock.destroy()
     this.channels.clear()
     for (const session of this.sessions.values()) session.stop()
     await Promise.all([this.shimServer, this.phoneServer, this.lanServer].filter(Boolean).map((s) => new Promise((resolve) => s.close(resolve))))
@@ -1350,7 +1354,14 @@ class Daemon {
 
   // ── Agents (shim connections) ─────────────────────────────────────────────────────────────────
 
+  /** Tracks [sock] until it closes (see [close]). */
+  track (sock) {
+    this.sockets.add(sock)
+    sock.once('close', () => this.sockets.delete(sock))
+  }
+
   onShim (sock) {
+    this.track(sock)
     let ch = null
     const timer = setTimeout(() => sock.destroy(), HELLO_TIMEOUT_MS)
     sock.on('error', () => {})
@@ -1486,6 +1497,7 @@ class Daemon {
         name: typeof info.name === 'string' ? info.name.slice(0, 100) : 'phone',
         app: typeof info.app === 'string' ? info.app.slice(0, 50) : null,
         since: new Date().toISOString(),
+        attachedAt: Date.now(),
         idle: null
       }
       if (this.phone) this.dropPhone(this.phone, 'replaced')
@@ -1520,6 +1532,8 @@ class Daemon {
   }
 
   touch (phone) {
+    phone.heardAt = Date.now()
+    phone.frames = (phone.frames || 0) + 1
     clearTimeout(phone.idle)
     phone.idle = setTimeout(() => {
       if (this.phone !== phone) return
@@ -1535,6 +1549,7 @@ class Daemon {
     let frame
     try { frame = JSON.parse(line) } catch (e) { return }
     if (!frame || typeof frame !== 'object') return
+    phone.lastFrame = String(frame.t) + (typeof frame.method === 'string' ? ' ' + frame.method : '')
     switch (frame.t) {
       case 'ping': send(phone.sock, { t: 'pong' }); return
       case 'data': {
@@ -1577,7 +1592,13 @@ class Daemon {
       this.failPending(ch)
       ch.opened = false
     }
-    this.log('phone detached (' + code + ')')
+    // How long the link lasted and when the phone was last heard: a link the phone closes right
+    // after its last ping arrived is the phone's doing; one long silent before was the path's.
+    const since = (t) => t ? Math.round((Date.now() - t) / 1000) + ' s' : '?'
+    // Bytes still queued toward the phone: a path that stopped carrying them back.
+    const queued = phone.sock && typeof phone.sock.writableLength === 'number' ? phone.sock.writableLength : 0
+    this.log('phone detached (' + code + '; up ' + since(phone.attachedAt) + ', last heard ' + since(phone.heardAt) +
+      ' ago, ' + (phone.frames || 0) + ' frames, last ' + (phone.lastFrame || 'hello') + ', ' + queued + ' bytes unsent)')
   }
 
   // ── Network pairing ───────────────────────────────────────────────────────────────────────────
@@ -1647,6 +1668,7 @@ class Daemon {
   }
 
   onLan (sock) {
+    this.track(sock)
     sock.setNoDelay(true)
     sock.on('error', () => {})
     const timer = setTimeout(() => sock.destroy(), HELLO_TIMEOUT_MS)

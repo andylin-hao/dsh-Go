@@ -14615,6 +14615,30 @@ class L10nEn extends L10n {
   }
 
   @override
+  String get agentsOnlyStatus => 'Agents connected';
+
+  @override
+  String agentsOnlyNote(String host) {
+    return '$host has no DSH; these are its agent sessions';
+  }
+
+  @override
+  String get agentsRecentFolders => 'Recent folders';
+
+  @override
+  String agentsRecentRemove(String name) {
+    return 'Remove $name from recent folders';
+  }
+
+  @override
+  String agentsOnlyMain(String host) {
+    return '$host has no DSH; you can use its agents';
+  }
+
+  @override
+  String get agentsOnlyNewSession => 'New agent session';
+
+  @override
   String get stateWorkspaceFilesHint => 'Files uploaded to the current workspace:';
 
   @override

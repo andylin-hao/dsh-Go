@@ -226,15 +226,32 @@ final hostLinkProvider = Provider.autoDispose.family<HostLink?, HostRef>((ref, h
 });
 
 /// Status of a host's link for the UI (idle for 本机).
-final hostLinkStatusProvider = StreamProvider.autoDispose.family<HostLinkStatus, HostRef>((ref, host) async* {
+final hostLinkStatusProvider = StreamProvider.autoDispose.family<HostLinkStatus, HostRef>((ref, host) {
   final link = ref.watch(hostLinkProvider(host));
-  if (link == null) {
-    yield HostLinkStatus.idle;
-    return;
-  }
-  yield link.status;
-  yield* link.statuses;
+  if (link == null) return Stream.value(HostLinkStatus.idle);
+  return currentAndChanges(() => link.status, link.statuses);
 });
+
+/// [current] (read when listened to), then every value of [changes] from that moment, with nothing
+/// lost in between: the two are taken in one step, and what arrives while the listener is paused
+/// waits.
+///
+/// An `async*` body that yields the current status and then `yield*`s the changes subscribes only
+/// once its first value was taken; Riverpod pauses a provider no visible widget reads (the side
+/// bar while closed), so the link's later updates, broadcast to nobody, were lost and the host
+/// read "connecting" after its link had long failed.
+Stream<T> currentAndChanges<T>(T Function() current, Stream<T> changes) {
+  StreamSubscription<T>? sub;
+  late final StreamController<T> out;
+  out = StreamController<T>(
+    onListen: () {
+      out.add(current());
+      sub = changes.listen(out.add, onError: out.addError, onDone: out.close);
+    },
+    onCancel: () => sub?.cancel(),
+  );
+  return out.stream;
+}
 
 /// Display name of a host as currently known.
 final hostNameProvider = Provider.autoDispose.family<String?, HostRef>((ref, host) {
@@ -309,7 +326,14 @@ class RemoteConnectionController extends AsyncNotifier<HostConnection?> {
 }
 
 final remoteConnectionProvider = AsyncNotifierProvider.autoDispose
-    .family<RemoteConnectionController, HostConnection?, HostRef>(RemoteConnectionController.new);
+    .family<RemoteConnectionController, HostConnection?, HostRef>(
+      RemoteConnectionController.new,
+      // The link retries what can recover by itself. A failure it calls final (no `dsh` on the host,
+      // a refused login, a changed host key) is not worth Riverpod's own retries: each would open a
+      // new SSH connection and flip the host between "connecting" and "failed" every few seconds.
+      retry: (count, error) =>
+          error is HostLinkError && !error.retryable ? null : ProviderContainer.defaultRetry(count, error),
+    );
 
 /// Last observation of the active connection, for diagnostics only. Stores
 /// enum names, booleans and a timestamp; never clients, hosts, or raw errors.

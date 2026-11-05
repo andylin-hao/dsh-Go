@@ -25,7 +25,8 @@ import '../../state/read_list_identity.dart';
 import '../../state/remote_agents_state.dart';
 import '../../state/workspaces_state.dart';
 import '../bots/bots_page.dart' show BotsPage, UnreadBadge;
-import '../remote_agents/agents_page.dart' show RemoteAgentsPage;
+import '../remote_agents/agent_chat_page.dart' show AgentChatPage;
+import '../remote_agents/agents_page.dart' show RemoteAgentsPage, agentStatusText, startAgentSession;
 import '../chat/media/media_format.dart' show chatTitleShown;
 import '../common/app_sheet.dart';
 import '../common/empty_view.dart';
@@ -455,7 +456,7 @@ class _SessionList extends ConsumerWidget {
     // arrived (rather than flash every conversation).
     final scope = ref.watch(drawerScopeProvider);
     if (scope == null) {
-      if (ref.watch(readListLiveConnectionProvider) == null && !sessions.isLoading) return const _EmptyState();
+      if (ref.watch(readListLiveConnectionProvider) == null && !sessions.isLoading) return _EmptyState(onClose: onClose);
       if (sessions.hasError) {
         return _Centered(
           child: EmptyView(
@@ -477,7 +478,7 @@ class _SessionList extends ConsumerWidget {
     final showAgents = workspace == null && ref.watch(remoteAgentsProvider.select((m) => m.isNotEmpty));
     if (scope.sessions.isEmpty && !showBots && !showAgents && ref.watch(drawerViewProvider).folders.isEmpty) {
       if (scope.readOnly) return _Centered(child: Text(readListStatusText(scope.status)));
-      return workspace == null ? const _EmptyState() : const _WorkspaceEmptyState();
+      return workspace == null ? _EmptyState(onClose: onClose) : const _WorkspaceEmptyState();
     }
     return DrawerConversationList(
       now: now,
@@ -914,13 +915,15 @@ class _WorkspaceEmptyState extends ConsumerWidget {
 /// No sessions: either the engine (or remote host) isn't up yet, or there
 /// simply are none.
 class _EmptyState extends ConsumerWidget {
-  const _EmptyState();
+  const _EmptyState({required this.onClose});
+
+  final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final host = ref.watch(activeHostProvider);
-    if (!host.isLocal) return _RemoteEmptyState(host: host);
+    if (!host.isLocal) return _RemoteEmptyState(host: host, onClose: onClose);
     final status = ref.watch(localRuntimeProvider.select((s) => s.status));
     if (EngineFailureCard.visibleFor(status)) {
       return const SingleChildScrollView(padding: EdgeInsets.fromLTRB(10, 8, 10, 16), child: EngineFailureCard());
@@ -965,16 +968,21 @@ class _EmptyState extends ConsumerWidget {
 }
 
 /// Empty list on a remote host: connecting, failed (with the reason and a
-/// retry), or connected with no conversations yet.
+/// retry), or connected with no conversations yet. An SSH host without DSH
+/// whose agents are attached lists their sessions instead.
 class _RemoteEmptyState extends ConsumerWidget {
-  const _RemoteEmptyState({required this.host});
+  const _RemoteEmptyState({required this.host, required this.onClose});
 
   final HostRef host;
+  final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final name = ref.watch(hostNameProvider(host)) ?? l10n.commonRemoteHost;
+    if (ref.watch(agentsOnlyHostProvider(host)) case final computer?) {
+      return _AgentsOnlyList(computer: computer, hostName: name, onClose: onClose);
+    }
     final status = ref.watch(hostLinkStatusProvider(host)).value ?? HostLinkStatus.idle;
     void retry() => ref.read(remoteConnectionProvider(host).notifier).retry();
     final view = switch (status.phase) {
@@ -1008,6 +1016,118 @@ class _RemoteEmptyState extends ConsumerWidget {
       ),
     };
     return _Centered(child: view);
+  }
+}
+
+/// The side bar of an SSH host without DSH: its agent sessions (dsh-go-link),
+/// newest first, each opening its chat, and a row for a new one.
+class _AgentsOnlyList extends StatelessWidget {
+  const _AgentsOnlyList({required this.computer, required this.hostName, required this.onClose});
+
+  final AgentComputer computer;
+  final String hostName;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final colors = DshColors.of(context);
+    // Close once the page covers the drawer, so "back" lands on the chat.
+    void open(Route<void> route) {
+      unawaited(Navigator.of(context).push(route));
+      Future<void>.delayed(AppMotion.slow, onClose);
+    }
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(10, 4, 10, 16),
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(10, 4, 10, 8),
+          child: Text(
+            l10n.agentsOnlyNote(hostName),
+            style: theme.textTheme.bodySmall?.copyWith(color: colors.textTertiary),
+          ),
+        ),
+        for (final s in computer.sessions)
+          _AgentSessionRow(
+            title: s.title ?? s.agentName,
+            subtitle: '${s.agentName} · ${s.folder} · ${agentStatusText(l10n, s)}',
+            tone: s.pending.isNotEmpty
+                ? StatusTone.warn
+                : s.busy
+                ? StatusTone.busy
+                : null,
+            icon: AppIcons.bot,
+            onTap: () => open(AgentChatPage.route(computer: computer.id, session: s.id)),
+          ),
+        if (computer.available.isNotEmpty)
+          _AgentSessionRow(
+            title: l10n.agentsNew,
+            icon: AppIcons.add,
+            onTap: () async {
+              if (await startAgentSession(context, computer)) Future<void>.delayed(AppMotion.slow, onClose);
+            },
+          )
+        else if (!computer.loading)
+          _AgentSessionRow(title: l10n.agentsNoneInstalled, icon: AppIcons.bot),
+      ],
+    );
+  }
+}
+
+class _AgentSessionRow extends StatelessWidget {
+  const _AgentSessionRow({required this.title, required this.icon, this.subtitle, this.tone, this.onTap});
+
+  final String title;
+  final String? subtitle;
+  final IconData icon;
+  final StatusTone? tone;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final colors = DshColors.of(context);
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: onTap,
+        customBorder: Squircle.border(AppShape.md),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+          child: Row(
+            children: [
+              Icon(icon, size: 20, color: scheme.onSurfaceVariant),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: subtitle == null ? 3 : 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyLarge?.copyWith(fontSize: 15, height: 1.4, color: scheme.onSurface),
+                    ),
+                    if (subtitle case final s?)
+                      Text(
+                        s,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(color: colors.textTertiary),
+                      ),
+                  ],
+                ),
+              ),
+              if (tone case final t?) ...[const SizedBox(width: 10), StatusDot(tone: t, size: 7)],
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

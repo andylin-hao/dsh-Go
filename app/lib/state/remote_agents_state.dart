@@ -10,9 +10,11 @@ import 'dart:convert';
 
 import 'package:dsh_link/dsh_link.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../remote/link/phone_link.dart';
 import '../remote/secret_store.dart';
+import 'connection_state.dart';
 import 'hosts_state.dart';
 import 'phone_link_state.dart';
 
@@ -35,19 +37,83 @@ class AgentEnvStore {
       if (v is! Map) return const {};
       return {
         for (final e in v.entries)
-          if (e.key is String && e.value is String && name.hasMatch(e.key as String)) e.key as String: e.value as String,
+          if (e.key is String && e.value is String && name.hasMatch(e.key as String))
+            e.key as String: e.value as String,
       };
     } on Object {
       return const {};
     }
   }
 
-  Future<void> write(String computer, String agent, Map<String, String> env) => env.isEmpty
-      ? _secrets.delete(_key(computer, agent))
-      : _secrets.write(_key(computer, agent), jsonEncode(env));
+  Future<void> write(String computer, String agent, Map<String, String> env) =>
+      env.isEmpty ? _secrets.delete(_key(computer, agent)) : _secrets.write(_key(computer, agent), jsonEncode(env));
 }
 
 final agentEnvStoreProvider = Provider<AgentEnvStore>((ref) => AgentEnvStore(ref.watch(secretStoreProvider)));
+
+/// Folders agent sessions were started or resumed in, per computer, newest first: the new-session
+/// sheet offers them so a usual project is one tap away. Kept on this phone (preferences).
+class AgentRecentFolders extends Notifier<Map<String, List<String>>> {
+  static const key = 'agents_recent_folders';
+
+  /// Per computer.
+  static const max = 8;
+
+  late Future<void> _loaded;
+
+  @override
+  Map<String, List<String>> build() {
+    _loaded = _load();
+    return const {};
+  }
+
+  Future<void> _load() async {
+    try {
+      final raw = (await SharedPreferences.getInstance()).getString(key);
+      final v = raw == null ? null : jsonDecode(raw);
+      if (v is! Map || !ref.mounted) return;
+      state = {
+        for (final e in v.entries)
+          if (e.key is String && e.value is List)
+            e.key as String: [
+              for (final p in e.value as List)
+                if (p is String && p.isNotEmpty) p,
+            ].take(max).toList(),
+      };
+    } catch (_) {
+      // No preferences backend, or nothing readable: no recent folders.
+    }
+  }
+
+  /// [path] on [computer] becomes the most recent.
+  Future<void> add(String computer, String path) async {
+    if (path.isEmpty) return;
+    await _loaded;
+    if (!ref.mounted) return;
+    final list = [path, ...?state[computer]?.where((p) => p != path)].take(max).toList();
+    await _save({...state, computer: list});
+  }
+
+  Future<void> remove(String computer, String path) async {
+    await _loaded;
+    if (!ref.mounted) return;
+    final list = [...?state[computer]?.where((p) => p != path)];
+    await _save({...state, computer: list}..removeWhere((_, v) => v.isEmpty));
+  }
+
+  Future<void> _save(Map<String, List<String>> next) async {
+    state = next;
+    try {
+      await (await SharedPreferences.getInstance()).setString(key, jsonEncode(next));
+    } catch (_) {
+      // Kept for this run only.
+    }
+  }
+}
+
+final agentRecentFoldersProvider = NotifierProvider<AgentRecentFolders, Map<String, List<String>>>(
+  AgentRecentFolders.new,
+);
 
 /// One attached computer that can run agents.
 class AgentComputer {
@@ -67,7 +133,10 @@ class AgentComputer {
   final List<AgentSessionInfo> sessions;
   final bool loading;
 
-  List<AgentKind> get available => [for (final a in agents) if (a.available) a];
+  List<AgentKind> get available => [
+    for (final a in agents)
+      if (a.available) a,
+  ];
 
   AgentComputer copyWith({List<AgentKind>? agents, List<AgentSessionInfo>? sessions, bool? loading}) => AgentComputer(
     id: id,
@@ -78,8 +147,9 @@ class AgentComputer {
   );
 }
 
-List<AgentSessionInfo> _sorted(Iterable<AgentSessionInfo> s) => s.where((x) => x.status != 'closed').toList()
-  ..sort((a, b) => (b.updatedAt ?? DateTime(0)).compareTo(a.updatedAt ?? DateTime(0)));
+List<AgentSessionInfo> _sorted(Iterable<AgentSessionInfo> s) =>
+    s.where((x) => x.status != 'closed').toList()
+      ..sort((a, b) => (b.updatedAt ?? DateTime(0)).compareTo(a.updatedAt ?? DateTime(0)));
 
 /// Attached computers with agents, by computer id, kept current from the daemons' notices.
 class RemoteAgentsController extends Notifier<Map<String, AgentComputer>> {
@@ -190,6 +260,8 @@ class RemoteAgentsController extends Notifier<Map<String, AgentComputer>> {
     final info = AgentSessionInfo.fromJson(r is Map ? r['session'] : null);
     if (info == null) throw const LinkCallError('malformed');
     _onNotice(id, LinkNotice('sessions', (r as Map)['session']));
+    // The folder as the computer resolved it (`~` expanded).
+    unawaited(ref.read(agentRecentFoldersProvider.notifier).add(id, info.cwd));
     return info.id;
   }
 
@@ -199,13 +271,18 @@ class RemoteAgentsController extends Notifier<Map<String, AgentComputer>> {
     final s = session(id);
     if (s == null) throw const LinkCallError('closed');
     if (!hasV2(id)) return const AgentHistory();
-    return AgentHistory.fromJson(await s.call('sessions.history', {'agent': agent, 'cwd': cwd, ...await _start(id, agent)}));
+    return AgentHistory.fromJson(
+      await s.call('sessions.history', {'agent': agent, 'cwd': cwd, ...await _start(id, agent)}),
+    );
   }
 
   /// Opens [entry]: a session the computer keeps is only watched (its running turn goes on);
   /// another one becomes a session there, resumed with its history. The session's id.
   Future<String> resume(String id, String agent, String cwd, AgentHistoryEntry entry, {bool bypass = false}) async {
-    if (entry.session case final kept?) return kept.id;
+    if (entry.session case final kept?) {
+      unawaited(ref.read(agentRecentFoldersProvider.notifier).add(id, kept.cwd));
+      return kept.id;
+    }
     final s = session(id);
     if (s == null) throw const LinkCallError('closed');
     final r = await s.call('sessions.resume', {
@@ -228,14 +305,30 @@ class RemoteAgentsController extends Notifier<Map<String, AgentComputer>> {
     return (
       path: '${m['path'] ?? ''}',
       parent: m['parent'] is String ? m['parent'] as String : null,
-      dirs: [for (final d in _list(r, 'dirs')) if (d is String) d],
+      dirs: [
+        for (final d in _list(r, 'dirs'))
+          if (d is String) d,
+      ],
     );
   }
 }
 
 List<Object?> _list(Object? r, String key) => r is Map && r[key] is List ? (r[key] as List).cast<Object?>() : const [];
 
-final remoteAgentsProvider = NotifierProvider<RemoteAgentsController, Map<String, AgentComputer>>(RemoteAgentsController.new);
+final remoteAgentsProvider = NotifierProvider<RemoteAgentsController, Map<String, AgentComputer>>(
+  RemoteAgentsController.new,
+);
+
+/// An SSH host without DSH whose agents this phone reaches through dsh-go-link: its DSH
+/// connection failed only because `dsh` is missing, and the attached computer of the same id runs
+/// agents. The host then reads as connected for its agents, and the side bar lists their sessions
+/// instead of the failure. Null otherwise.
+final agentsOnlyHostProvider = Provider.autoDispose.family<AgentComputer?, HostRef>((ref, host) {
+  if (host.kind != HostKind.ssh) return null;
+  final status = ref.watch(hostLinkStatusProvider(host)).value;
+  if (status?.phase != HostLinkPhase.failed || status?.error?.kind != HostLinkErrorKind.dshNotFound) return null;
+  return ref.watch(remoteAgentsProvider.select((m) => m[host.id]));
+});
 
 /// What an agent chat page shows.
 class AgentChatState {
@@ -272,7 +365,9 @@ class AgentChatController extends Notifier<AgentChatState> {
       unawaited(_notices?.cancel());
       unawaited(_sessions?.cancel());
       final s = _session;
-      if (s != null && !s.isClosed) unawaited(s.call('sessions.unwatch', {'id': key.session}).catchError((Object _) => null));
+      if (s != null && !s.isClosed) {
+        unawaited(s.call('sessions.unwatch', {'id': key.session}).catchError((Object _) => null));
+      }
     });
     final link = ref.read(phoneLinksProvider.notifier).link(key.computer);
     _sessions = link?.sessions.listen(_attach);

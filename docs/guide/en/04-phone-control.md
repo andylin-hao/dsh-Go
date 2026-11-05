@@ -136,7 +136,7 @@ A connected computer with Claude Code, Codex, Antigravity, OpenCode or Gemini CL
 
 Sessions run on the computer: closing the app, losing the connection or locking the phone doesn't interrupt them, and they catch up when you're back. A session's agent gets this phone's tools by itself. When you tap Stop (on the floating bar, in the app or in the notification), its turn stops too; the screen turning off or accessibility dropping only stops the phone actions, and the agent carries on with its work on the computer.
 
-Once you've picked a folder, **Sessions in this folder** lists the agent's sessions there, including ones you started in a terminal on the computer. Tapping one that still runs on the computer just attaches to it without interrupting it; tapping another continues it, showing the history the agent kept first. If the same session is still open in a terminal, both carry on separately without interrupting each other.
+**Recent folders** sit above the folder browser (where you started or continued sessions on this computer, and the folders of its current sessions), one tap away; remove the ones you don't need. Once you've picked a folder, **Sessions in this folder** lists the agent's sessions there, including ones you started in a terminal on the computer. Tapping one that still runs on the computer just attaches to it without interrupting it; tapping another continues it, showing the history the agent kept first. If the same session is still open in a terminal, both carry on separately without interrupting each other.
 
 The new-session sheet and the session menu also have:
 

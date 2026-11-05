@@ -66,5 +66,11 @@
   "agentsErrResume": "This agent can’t reopen earlier sessions",
   "agentsErrMode": "The agent didn’t switch modes: {mode}",
   "agentsSubfolders": "Folders inside",
-  "agentsBypassOnNote": "Skipping permission prompts: {agent} runs commands and changes files without asking"
+  "agentsBypassOnNote": "Skipping permission prompts: {agent} runs commands and changes files without asking",
+  "agentsOnlyStatus": "Agents connected",
+  "agentsOnlyNote": "{host} has no DSH; these are its agent sessions",
+  "agentsRecentFolders": "Recent folders",
+  "agentsRecentRemove": "Remove {name} from recent folders",
+  "agentsOnlyMain": "{host} has no DSH; you can use its agents",
+  "agentsOnlyNewSession": "New agent session"
 }

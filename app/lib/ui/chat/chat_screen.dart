@@ -30,6 +30,8 @@ import '../../state/drawer_view_state.dart';
 import '../../state/engine_control.dart';
 import '../../state/engine_settings_state.dart' show engineSettingsProvider;
 import '../../state/hosts_state.dart' show HostKind, activeHostProvider;
+import '../../state/remote_agents_state.dart' show agentsOnlyHostProvider;
+import '../remote_agents/agents_page.dart' show startAgentSession;
 import '../../state/media_generation.dart';
 import '../../state/mention_state.dart';
 import '../../state/models_state.dart';
@@ -1323,6 +1325,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> with WidgetsBindingObse
             ),
           )
         : null;
+    // An SSH host without DSH whose agents are attached: their sessions, not a reconnect that
+    // can't install DSH.
+    final activeHost = ref.watch(activeHostProvider);
+    final agentsOnly = ref.watch(agentsOnlyHostProvider(activeHost));
     final idle = switch (localIdle) {
       RuntimePhase.notInstalled => ChatIdleAction(
         message: l10n.localEnvNotInstalled,
@@ -1333,6 +1339,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> with WidgetsBindingObse
         message: l10n.shellEngineNotRunning,
         label: l10n.shellStartEngine,
         onTap: () => unawaited(EngineControl.ensureStarted(ProviderScope.containerOf(context, listen: false))),
+      ),
+      _ when agentsOnly != null => ChatIdleAction(
+        message: l10n.agentsOnlyMain(agentsOnly.name),
+        label: l10n.agentsOnlyNewSession,
+        onTap: () => unawaited(startAgentSession(context, agentsOnly)),
       ),
       _ => null,
     };
@@ -1536,7 +1547,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> with WidgetsBindingObse
                                       starting: starting,
                                       tidying: tidying,
                                       idle: idle,
-                                      onReconnect: connAsync.hasError && !connAsync.isLoading && !failureCard
+                                      onReconnect:
+                                          connAsync.hasError &&
+                                              !connAsync.isLoading &&
+                                              !failureCard &&
+                                              agentsOnly == null
                                           ? _reconnect
                                           : null,
                                       onSuggestion: _onSuggestion,

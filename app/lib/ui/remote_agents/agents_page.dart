@@ -69,7 +69,11 @@ class RemoteAgentsPage extends ConsumerWidget {
                   onTap: () => Navigator.of(context).push(AgentChatPage.route(computer: c.id, session: s.id)),
                 ),
               if (c.available.isNotEmpty)
-                ListPageRow(icon: AppIcons.add, title: l10n.agentsNew, onTap: () => unawaited(_newSession(context, c))),
+                ListPageRow(
+                  icon: AppIcons.add,
+                  title: l10n.agentsNew,
+                  onTap: () => unawaited(startAgentSession(context, c)),
+                ),
             ],
           ),
           const SizedBox(height: 24),
@@ -77,18 +81,20 @@ class RemoteAgentsPage extends ConsumerWidget {
       ],
     );
   }
+}
 
-  Future<void> _newSession(BuildContext context, AgentComputer computer) async {
-    final id = await showAppSheet<String>(
-      context,
-      heightFactor: 0.86,
-      isScrollControlled: true,
-      builder: (_) => NewAgentSessionSheet(computer: computer),
-    );
-    if (id != null && context.mounted) {
-      unawaited(Navigator.of(context).push(AgentChatPage.route(computer: computer.id, session: id)));
-    }
-  }
+/// Picks an agent and a folder on [computer] (or one of the folder's earlier sessions), then
+/// opens that session's chat. False when the sheet was closed without one.
+Future<bool> startAgentSession(BuildContext context, AgentComputer computer) async {
+  final id = await showAppSheet<String>(
+    context,
+    heightFactor: 0.86,
+    isScrollControlled: true,
+    builder: (_) => NewAgentSessionSheet(computer: computer),
+  );
+  if (id == null || !context.mounted) return false;
+  unawaited(Navigator.of(context).push(AgentChatPage.route(computer: computer.id, session: id)));
+  return true;
 }
 
 String agentStatusText(L10n l10n, AgentSessionInfo s) {
@@ -146,12 +152,28 @@ class _NewAgentSessionSheetState extends ConsumerState<NewAgentSessionSheet> {
     try {
       final f = await _agents.folders(widget.computer.id, path);
       if (!mounted) return;
-      setState(() => _folder = f);
+      setState(() {
+        _folder = f;
+        _error = null;
+      });
       _loadHistory();
     } on LinkCallError catch (e) {
+      // A recent folder that is gone from the computer leaves the list.
+      if (e.code == 'no_folder' && path != null) {
+        unawaited(ref.read(agentRecentFoldersProvider.notifier).remove(widget.computer.id, path));
+      }
       if (mounted) setState(() => _error = e.message.isEmpty ? e.code : e.message);
     }
   }
+
+  /// This phone's recent folders on the computer, then the folders of its sessions, newest first.
+  List<String> _recents(List<String> stored, List<AgentSessionInfo> sessions) => {
+    ...stored,
+    for (final s in sessions)
+      if (s.cwd.isNotEmpty) s.cwd,
+  }.take(AgentRecentFolders.max).toList();
+
+  static String _lastPart(String path) => path.split(RegExp(r'[/\\]')).where((p) => p.isNotEmpty).lastOrNull ?? path;
 
   void _pickAgent(String id) {
     if (id == _agent) return;
@@ -192,11 +214,8 @@ class _NewAgentSessionSheetState extends ConsumerState<NewAgentSessionSheet> {
     });
   }
 
-  AgentKind? get _kind => ref
-      .read(remoteAgentsProvider)[widget.computer.id]
-      ?.agents
-      .where((a) => a.id == _agent)
-      .firstOrNull;
+  AgentKind? get _kind =>
+      ref.read(remoteAgentsProvider)[widget.computer.id]?.agents.where((a) => a.id == _agent).firstOrNull;
 
   Future<void> _toggleBypass(bool on, String agentName) async {
     if (on && !await confirmRisk(context, RiskNotices.agentBypass(agentName))) return;
@@ -241,6 +260,11 @@ class _NewAgentSessionSheetState extends ConsumerState<NewAgentSessionSheet> {
     final kind = agents.where((a) => a.id == _agent).firstOrNull ?? _kind;
     final agentName = kind?.name ?? _agent;
     final v2 = _v2;
+    final stored = ref.watch(agentRecentFoldersProvider.select((m) => m[widget.computer.id])) ?? const <String>[];
+    final recents = _recents(
+      stored,
+      ref.watch(remoteAgentsProvider.select((m) => m[widget.computer.id]?.sessions)) ?? widget.computer.sessions,
+    );
     return SafeArea(
       top: false,
       child: Column(
@@ -275,7 +299,12 @@ class _NewAgentSessionSheetState extends ConsumerState<NewAgentSessionSheet> {
                         value: _envCount == 0 ? l10n.agentsEnvNone : l10n.agentsEnvCount(_envCount),
                         chevron: true,
                         onTap: () async {
-                          await showAgentEnvSheet(context, computer: widget.computer.id, agent: _agent, agentName: agentName);
+                          await showAgentEnvSheet(
+                            context,
+                            computer: widget.computer.id,
+                            agent: _agent,
+                            agentName: agentName,
+                          );
                           unawaited(_countEnv());
                         },
                       ),
@@ -283,9 +312,39 @@ class _NewAgentSessionSheetState extends ConsumerState<NewAgentSessionSheet> {
                         ListPageRow(
                           icon: AppIcons.approval,
                           title: l10n.agentsBypass,
-                          subtitle: bypass == AgentBypass.mode ? l10n.agentsBypassHintMode : l10n.agentsBypassHintRestart,
+                          subtitle: bypass == AgentBypass.mode
+                              ? l10n.agentsBypassHintMode
+                              : l10n.agentsBypassHintRestart,
                           subtitleMaxLines: 2,
                           trailing: Switch(value: _bypass, onChanged: (v) => unawaited(_toggleBypass(v, agentName))),
+                        ),
+                    ],
+                  ),
+                ],
+                if (recents.isNotEmpty) ...[
+                  const SizedBox(height: 20),
+                  ListPageCard(
+                    title: l10n.agentsRecentFolders,
+                    margin: const EdgeInsets.symmetric(horizontal: kSheetGutter),
+                    children: [
+                      for (final p in recents)
+                        ListPageRow(
+                          icon: AppIcons.history,
+                          title: _lastPart(p),
+                          subtitle: p,
+                          trailing: folder?.path == p
+                              ? const Icon(AppIcons.allowed)
+                              : stored.contains(p)
+                              ? IconButton(
+                                  tooltip: l10n.agentsRecentRemove(_lastPart(p)),
+                                  visualDensity: VisualDensity.compact,
+                                  icon: const Icon(AppIcons.close, size: 18),
+                                  onPressed: () => unawaited(
+                                    ref.read(agentRecentFoldersProvider.notifier).remove(widget.computer.id, p),
+                                  ),
+                                )
+                              : null,
+                          onTap: folder?.path == p ? null : () => unawaited(_open(p)),
                         ),
                     ],
                   ),
@@ -397,8 +456,7 @@ class _EarlierSessions extends StatelessWidget {
               subtitle: l10n.agentsEarlierOnComputer(forumAgo(e.updatedAt)),
               onTap: enabled && h.canLoad ? () => onOpen(e) : null,
             ),
-        if (note != null)
-          ListPageRow(icon: AppIcons.history, iconColor: muted, title: note, titleMaxLines: 3),
+        if (note != null) ListPageRow(icon: AppIcons.history, iconColor: muted, title: note, titleMaxLines: 3),
       ],
     );
   }

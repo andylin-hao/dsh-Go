@@ -202,5 +202,32 @@
         "type": "String"
       }
     }
-  }
+  },
+  "agentsOnlyStatus": "智能体已连接",
+  "agentsOnlyNote": "「{host}」上没有 DSH，这里是它上面的智能体对话",
+  "@agentsOnlyNote": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsRecentFolders": "最近用过的文件夹",
+  "agentsRecentRemove": "从最近里移除 {name}",
+  "@agentsRecentRemove": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsOnlyMain": "「{host}」上没有 DSH，可以用它上面的智能体",
+  "@agentsOnlyMain": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "agentsOnlyNewSession": "新建智能体对话"
 }

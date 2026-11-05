@@ -13904,6 +13904,30 @@ class L10nZh extends L10n {
   }
 
   @override
+  String get agentsOnlyStatus => '智能体已连接';
+
+  @override
+  String agentsOnlyNote(String host) {
+    return '「$host」上没有 DSH，这里是它上面的智能体对话';
+  }
+
+  @override
+  String get agentsRecentFolders => '最近用过的文件夹';
+
+  @override
+  String agentsRecentRemove(String name) {
+    return '从最近里移除 $name';
+  }
+
+  @override
+  String agentsOnlyMain(String host) {
+    return '「$host」上没有 DSH，可以用它上面的智能体';
+  }
+
+  @override
+  String get agentsOnlyNewSession => '新建智能体对话';
+
+  @override
   String get stateWorkspaceFilesHint => '已上传到当前工作区的文件：';
 
   @override

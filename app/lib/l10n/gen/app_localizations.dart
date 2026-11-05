@@ -25358,6 +25358,42 @@ abstract class L10n {
   /// **'已跳过权限确认：{agent} 不会先问你就运行命令、修改文件'**
   String agentsBypassOnNote(String agent);
 
+  /// No description provided for @agentsOnlyStatus.
+  ///
+  /// In zh, this message translates to:
+  /// **'智能体已连接'**
+  String get agentsOnlyStatus;
+
+  /// No description provided for @agentsOnlyNote.
+  ///
+  /// In zh, this message translates to:
+  /// **'「{host}」上没有 DSH，这里是它上面的智能体对话'**
+  String agentsOnlyNote(String host);
+
+  /// No description provided for @agentsRecentFolders.
+  ///
+  /// In zh, this message translates to:
+  /// **'最近用过的文件夹'**
+  String get agentsRecentFolders;
+
+  /// No description provided for @agentsRecentRemove.
+  ///
+  /// In zh, this message translates to:
+  /// **'从最近里移除 {name}'**
+  String agentsRecentRemove(String name);
+
+  /// No description provided for @agentsOnlyMain.
+  ///
+  /// In zh, this message translates to:
+  /// **'「{host}」上没有 DSH，可以用它上面的智能体'**
+  String agentsOnlyMain(String host);
+
+  /// No description provided for @agentsOnlyNewSession.
+  ///
+  /// In zh, this message translates to:
+  /// **'新建智能体对话'**
+  String get agentsOnlyNewSession;
+
   /// No description provided for @stateWorkspaceFilesHint.
   ///
   /// In zh, this message translates to:
