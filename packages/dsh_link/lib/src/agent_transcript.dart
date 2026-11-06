@@ -390,7 +390,9 @@ class AgentTranscript {
   void reset() {
     items.clear();
     lastSeq = 0;
-    _closeText();
+    // Text still streaming went with the items (closing it would index the emptied list).
+    _answer = null;
+    _thought = null;
     _plan = null;
     _tools.clear();
     _permissions.clear();
@@ -417,6 +419,11 @@ class AgentTranscript {
     if (seq <= lastSeq) return;
     lastSeq = seq;
     switch (event['kind']) {
+      // The computer reloaded the session from the agent's own record (it went on in a terminal):
+      // the history follows in full.
+      case 'reset':
+        reset();
+        lastSeq = seq;
       case 'user':
         _plan = null;
         _add(AgentUserItem(seq, '${event['text'] ?? ''}', images: _i(event['images'])));

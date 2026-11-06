@@ -113,7 +113,8 @@ readline.createInterface({ input: process.stdin }).on('line', (line) => {
         result: {
           sessions: [
             { sessionId: 't-1', cwd, title: 'From the terminal', updatedAt: '2026-01-02T00:00:00Z' },
-            { sessionId: 's-1', cwd, title: 'Made by the daemon', updatedAt: '2026-01-01T00:00:00Z' },
+            // FAKE_S1_UPDATED: s-1 went on elsewhere (a terminal) at that time.
+            { sessionId: 's-1', cwd, title: 'Made by the daemon', updatedAt: process.env.FAKE_S1_UPDATED || '2026-01-01T00:00:00Z' },
             { sessionId: 'x-1', cwd: '/elsewhere', title: 'Another folder', updatedAt: '2026-01-03T00:00:00Z' }
           ]
         }

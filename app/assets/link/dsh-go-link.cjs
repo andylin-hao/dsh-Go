@@ -26,7 +26,7 @@ const { spawn } = require('child_process')
 
 const { EventEmitter } = require('events')
 
-const VERSION = '0.3.0'
+const VERSION = '0.3.1'
 const PROTOCOL = 1
 /**
  * What this daemon offers in protocol 1; the phone uses a feature only when it is listed.
@@ -687,6 +687,10 @@ const ACP_PROTOCOL = 1
 const MAX_EVENTS_KEPT = 4000
 const MAX_EVENT_BYTES = 512 * 1024
 const MAX_WATCH_EVENTS = 1500
+/** The agent's record of a session newer than ours by more than this: it went on elsewhere. */
+const OUTSIDE_SLACK_MS = 30 * 1000
+/** Opening a session checks the agent's record at most this often. */
+const OUTSIDE_CHECK_MS = 30 * 1000
 
 // The ACP adapters (agentclientprotocol.com; formerly @zed-industries/*), pinned. They use the
 // agent's own sign-in on this computer (`claude` / `codex login`). `bypass` is how the agent runs
@@ -859,6 +863,9 @@ class AgentSession {
     this.stderr = []
     this.replaying = null
     this.replayUser = null
+    /** The check against the agent's own record in flight (refreshFromAgent), and when it last ran. */
+    this.checking = null
+    this.checkedAt = 0
   }
 
   get id () { return this.meta.id }
@@ -996,6 +1003,7 @@ class AgentSession {
           delete this.meta.imported
           this.append({ kind: 'notice', code: 'resumed' })
         }
+        this.meta.syncedAt = Date.now()
         if (loaded && loaded.modes) this.meta.modes = loaded.modes
         if (!this.meta.initialMode && this.meta.modes) this.meta.initialMode = this.meta.modes.currentModeId
         // The mode the session had before this restart (bypass included), as the agent confirms it.
@@ -1005,6 +1013,7 @@ class AgentSession {
         if (this.meta.agentSessionId) this.append({ kind: 'notice', code: 'context_lost' })
         const created = await peer.request('session/new', { cwd: this.meta.cwd, mcpServers })
         this.meta.agentSessionId = created && created.sessionId
+        this.meta.syncedAt = Date.now()
         if (created && created.modes) {
           this.meta.modes = created.modes
           this.meta.initialMode = created.modes.currentModeId
@@ -1098,7 +1107,11 @@ class AgentSession {
     const prompt = [{ type: 'text', text }]
     for (const img of images) if (img && img.data && img.mimeType) prompt.push({ type: 'image', data: img.data, mimeType: img.mimeType })
     this.peer.request('session/prompt', { sessionId: this.meta.agentSessionId, prompt }).then(
-      (r) => this.append({ kind: 'turn_end', stopReason: (r && r.stopReason) || 'end_turn' }),
+      (r) => {
+        // The agent wrote this turn to its own record: we have all of it.
+        this.meta.syncedAt = Date.now()
+        this.append({ kind: 'turn_end', stopReason: (r && r.stopReason) || 'end_turn' })
+      },
       (e) => {
         this.append({ kind: 'error', code: isAuthError(e) ? 'auth_required' : (typeof e.code === 'string' ? e.code : 'prompt_failed'), message: String(e.message || '') })
         this.append({ kind: 'turn_end', stopReason: 'error' })
@@ -1173,6 +1186,35 @@ class AgentSession {
     this.daemon.saveSessions()
     await this.stopProcess()
     this.daemon.sessionChanged(this)
+  }
+
+  /**
+   * Whether the agent's own record of this session moved on without us (someone went on with it in
+   * a terminal): [listedAt] is its session list's `updatedAt`, ours the last load or turn here.
+   */
+  changedOutside (listedAt) {
+    const t = Date.parse(listedAt || '')
+    if (!Number.isFinite(t)) return false
+    const ours = this.meta.syncedAt || Date.parse(this.meta.updatedAt || '') || 0
+    return t > ours + OUTSIDE_SLACK_MS
+  }
+
+  /**
+   * Starts over from the agent's own record: the process (holding the old context) stops, our log
+   * is replaced by the agent's replay, after a `reset` event that tells a watching phone to clear
+   * what it shows. Never while a turn runs or a question waits.
+   */
+  async resync () {
+    if (this.status === 'running' || this.status === 'starting' || this.status === 'closed' || this.permissions.size) return false
+    await this.stopProcess()
+    this.load()
+    this.events = []
+    try { fs.writeFileSync(this.logFile, '', { mode: 0o600 }) } catch (e) {}
+    this.append({ kind: 'reset' })
+    this.meta.imported = true
+    this.daemon.saveSessions()
+    this.ensureProcess().catch(() => {}) // failures are in its log
+    return true
   }
 
   /** Stops the process and waits for it to go (the session stays; the next prompt starts it). */
@@ -1754,6 +1796,33 @@ class Daemon {
     return job
   }
 
+  /**
+   * Opening [session]: when its agent's own record went on elsewhere, reload it from there. In the
+   * background, one check at a time and at most every OUTSIDE_CHECK_MS, never mid-turn.
+   */
+  refreshFromAgent (session) {
+    const def = session.def()
+    if (!def || !def.available || !session.meta.agentSessionId || session.checking) return session.checking
+    if (Date.now() - (session.checkedAt || 0) < OUTSIDE_CHECK_MS) return null
+    if (session.status === 'running' || session.status === 'starting' || session.status === 'closed') return null
+    // A prompt sent meanwhile waits for this (sessions.prompt), so it never runs on the old context.
+    session.checking = (async () => {
+      try {
+        const listed = await this.agentHistory(def, session.meta.cwd)
+        session.checkedAt = Date.now()
+        const entry = listed.sessions.find((x) => x.agentSessionId === session.meta.agentSessionId)
+        if (entry && listed.canLoad && session.changedOutside(entry.updatedAt) && await session.resync()) {
+          this.log('agent session ' + session.id + ' went on outside; reloaded from the agent')
+        }
+      } catch (e) {
+        // No list from the agent: the session stays as it is.
+      } finally {
+        session.checking = null
+      }
+    })()
+    return session.checking
+  }
+
   /** A folder on this computer, resolved (`~` expanded); a `no_folder` error when it is not one. */
   folder (raw) {
     const cwd = path.resolve(expandHome(typeof raw === 'string' && raw.trim() ? raw.trim() : '~'))
@@ -1849,7 +1918,19 @@ class Daemon {
         const ours = [...this.sessions.values()].filter((s) => s.status !== 'closed' && s.meta.agent === agent.id && s.meta.cwd === cwd)
         const listed = await this.agentHistory(agent, cwd).catch((e) => ({ listed: false, canLoad: false, sessions: [], error: e.code || 'failed' }))
         const byAgentId = new Map(ours.filter((s) => s.meta.agentSessionId).map((s) => [s.meta.agentSessionId, s]))
-        const entries = ours.map((s) => ({ agentSessionId: s.meta.agentSessionId || null, title: s.meta.title || null, updatedAt: s.meta.updatedAt, session: s.summary() }))
+        const listedById = new Map(listed.sessions.map((x) => [x.agentSessionId, x]))
+        const entries = ours.map((s) => {
+          const theirs = listedById.get(s.meta.agentSessionId)
+          // Went on elsewhere: listed by its latest activity, and opening it reloads it.
+          const changed = !!(theirs && s.changedOutside(theirs.updatedAt))
+          return {
+            agentSessionId: s.meta.agentSessionId || null,
+            title: s.meta.title || null,
+            updatedAt: changed ? theirs.updatedAt : s.meta.updatedAt,
+            changed,
+            session: s.summary()
+          }
+        })
         for (const x of listed.sessions) if (!byAgentId.has(x.agentSessionId)) entries.push({ ...x, session: null })
         entries.sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')))
         return { cwd, listed: listed.listed, canLoad: listed.canLoad, error: listed.error || null, sessions: entries.slice(0, 100) }
@@ -1881,6 +1962,8 @@ class Daemon {
         const s = this.session(p.id)
         phone.watching.add(s.id)
         const { events, truncated } = s.since(Number.isInteger(p.afterSeq) ? p.afterSeq : 0)
+        // Went on in a terminal since? Then it reloads, and the phone gets a reset and the history.
+        this.refreshFromAgent(s)
         return { session: s.summary(), events, truncated }
       }
       case 'sessions.unwatch':
@@ -1892,6 +1975,7 @@ class Daemon {
         if (!text.trim() && !images.length) throw Object.assign(new Error('Nothing to send.'), { code: 'empty' })
         const s = this.session(p.id)
         this.takeEnv(s.meta.agent, p.env)
+        if (s.checking) await s.checking
         await s.prompt(text, images)
         return {}
       }

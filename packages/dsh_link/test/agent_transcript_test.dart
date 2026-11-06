@@ -152,6 +152,26 @@ void main() {
     expect(AgentKind.fromJson({'id': 'opencode', 'name': 'OpenCode', 'available': false})!.available, isFalse);
   });
 
+  test('a reset (the session reloaded from the agent) clears what was shown; the history follows', () {
+    final t = AgentTranscript()
+      ..apply({'seq': 1, 'kind': 'user', 'text': 'old question'})
+      ..apply({
+        'seq': 2,
+        'kind': 'update',
+        'update': {
+          'sessionUpdate': 'agent_message_chunk',
+          'content': {'type': 'text', 'text': 'old answer'},
+        },
+      })
+      ..apply({'seq': 3, 'kind': 'reset'})
+      ..apply({'seq': 4, 'kind': 'user', 'text': 'from the terminal'});
+    expect(t.items.map((i) => i is AgentUserItem ? i.text : i.runtimeType.toString()), ['from the terminal']);
+    expect(t.lastSeq, 4);
+    // Replays of what came before the reset stay out.
+    t.apply({'seq': 2, 'kind': 'user', 'text': 'stale'});
+    expect(t.items, hasLength(1));
+  });
+
   test('bypass and earlier sessions (agents.acp.v2) read leniently; older daemons mean none', () {
     expect(AgentKind.fromJson({'id': 'claude-code', 'available': true, 'bypass': 'mode'})!.bypass, AgentBypass.mode);
     expect(AgentKind.fromJson({'id': 'antigravity', 'available': true, 'bypass': 'restart'})!.bypass, AgentBypass.restart);

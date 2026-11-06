@@ -1,6 +1,6 @@
 {
   "name": "dsh-go-link",
-  "version": "0.2.0",
+  "version": "0.3.1",
   "description": "Lets agents on this computer (Claude Code, Codex, OpenCode, Antigravity, ...) use the tools of a phone running DSH Go, and lets the phone start and steer agents here over ACP. The phone dials in over SSH, or over the local network after a QR pairing.",
   "license": "AGPL-3.0-only",
   "bin": {

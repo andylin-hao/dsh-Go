@@ -359,3 +359,55 @@ test('start of another version leaves a busy daemon running, asked to retire', a
   assert.equal((await phone.sessionEvent(session.id, (e) => e.kind === 'turn_end')).stopReason, 'cancelled')
   await waitFor(() => d.closed)
 })
+
+test('a session that went on in a terminal reloads from the agent when opened (not mid-turn)', async (t) => {
+  const { phone, dir } = await setup(t)
+  const { session } = await phone.call('sessions.new', { agent: 'fake', cwd: dir })
+  await phone.event((f) => f.name === 'sessions' && f.data.id === session.id && f.data.status === 'idle')
+  await phone.call('sessions.prompt', { id: session.id, text: 'hello' })
+  await phone.sessionEvent(session.id, (e) => e.kind === 'turn_end')
+
+  // Its agent's own record moved on after that (someone used it in a terminal).
+  process.env.FAKE_S1_UPDATED = new Date(Date.now() + 60 * 60 * 1000).toISOString()
+  const history = await phone.call('sessions.history', { agent: 'fake', cwd: dir })
+  const ours = history.sessions.find((x) => x.agentSessionId === 's-1')
+  assert.equal(ours.changed, true)
+  assert.equal(ours.updatedAt, process.env.FAKE_S1_UPDATED)
+
+  // Opening it: a reset, then the agent's history in full, replacing what was kept here.
+  const first = await phone.call('sessions.watch', { id: session.id, afterSeq: 0 })
+  const before = first.events[first.events.length - 1].seq
+  const reset = await phone.sessionEvent(session.id, (e) => e.kind === 'reset')
+  assert.ok(reset.seq > before)
+  const user = await phone.sessionEvent(session.id, (e) => e.kind === 'user' && e.seq > reset.seq)
+  assert.equal(user.text, 'earlier question')
+  await phone.sessionEvent(session.id, (e) => e.kind === 'notice' && e.code === 'resumed')
+  const again = await phone.call('sessions.watch', { id: session.id, afterSeq: 0 })
+  assert.equal(again.events[0].kind, 'reset')
+  assert.equal(again.truncated, true)
+  assert.equal(fs.readFileSync(path.join(dir, 'sessions', session.id + '.jsonl'), 'utf8').split('\n')[0].includes('"reset"'), true)
+
+  // In sync now: the next turn goes on from there, and opening it again within the check interval
+  // reloads nothing.
+  delete process.env.FAKE_S1_UPDATED
+  await phone.call('sessions.prompt', { id: session.id, text: 'hello' })
+  await phone.sessionEvent(session.id, (e) => e.kind === 'turn_end')
+  await phone.call('sessions.watch', { id: session.id, afterSeq: 0 })
+  await new Promise((resolve) => setTimeout(resolve, 300))
+  const { events } = await phone.call('sessions.watch', { id: session.id, afterSeq: 0 })
+  assert.equal(events.filter((e) => e.kind === 'reset').length, 1)
+})
+
+test('a session kept in sync is never reloaded when opened', async (t) => {
+  const { phone, dir } = await setup(t)
+  const { session } = await phone.call('sessions.new', { agent: 'fake', cwd: dir })
+  await phone.event((f) => f.name === 'sessions' && f.data.id === session.id && f.data.status === 'idle')
+  await phone.call('sessions.prompt', { id: session.id, text: 'hello' })
+  await phone.sessionEvent(session.id, (e) => e.kind === 'turn_end')
+  // The agent lists it as last changed when this daemon last had it (its default, 2026-01-01, is older).
+  await phone.call('sessions.watch', { id: session.id, afterSeq: 0 })
+  await new Promise((resolve) => setTimeout(resolve, 500))
+  const { events } = await phone.call('sessions.watch', { id: session.id, afterSeq: 0 })
+  assert.equal(events.filter((e) => e.kind === 'reset').length, 0)
+  assert.equal((await phone.call('sessions.history', { agent: 'fake', cwd: dir })).sessions[0].changed, false)
+})
